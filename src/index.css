@@ -1,0 +1,16 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f7f4d5;
+}
+
+* {
+  box-sizing: border-box;
+}
