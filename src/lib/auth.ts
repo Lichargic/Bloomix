@@ -1,8 +1,18 @@
+import { supabase } from './supabase'
+
 interface MagicLinkAuthClient {
   signInWithOtp(credentials: {
     email: string
     options: { emailRedirectTo: string }
   }): Promise<{ error: { message?: string } | null }>
+}
+
+export async function signInWithGoogle(origin: string) {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${origin}/auth/callback` },
+  })
+  return error ? { ok: false as const, message: error.message } : { ok: true as const }
 }
 
 export type MagicLinkResult =
