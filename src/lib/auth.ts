@@ -24,8 +24,10 @@ export async function sendMagicLink(
   email: string,
   origin: string,
 ): Promise<MagicLinkResult> {
+  const normalizedEmail = email.trim().toLowerCase()
+
   const { error } = await auth.signInWithOtp({
-    email: email.trim(),
+    email: normalizedEmail,
     options: { emailRedirectTo: `${origin}/auth/callback` },
   })
 

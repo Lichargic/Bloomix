@@ -1,0 +1,81 @@
+/* ───────────────────────── Theme tokens ───────────────────────── */
+:root,
+body[data-season="spring"] {
+  --bg: #f7f4d5;
+  --ink: #1a3a2e;
+  --ink-soft: #4a5e4a;
+  --paper: #fefae1;
+  --nav: #18412e;
+  --nav-ink: #f7f4d5;
+  --accent: #edacc0;
+  --accent-2: #c9d39a;
+  --panel: #c5d3a4;
+  --panel-stroke: #105566;
+  --task: #cd9388;
+  --task-ink: #fefae1;
+  --check-bg: #fefae1;
+  --check-ink: #67a35a;
+  --weather: linear-gradient(180deg, #ffd6e1 0%, #f7f4d5 60%);
+  --grow-bar: linear-gradient(90deg, #88a96f 0%, #c9d39a 100%);
+  --tree-shadow-bottom: 11%;
+}
+
+body[data-season="summer"] {
+  --bg: #fefae1;
+  --ink: #2d3a1f;
+  --ink-soft: #586e3e;
+  --paper: #fefae1;
+  --nav: #364025;
+  --nav-ink: #f7f4d5;
+  --accent: #f0c75e;
+  --accent-2: #82ba89;
+  --panel: #bccc9c;
+  --panel-stroke: #364025;
+  --task: #82ba89;
+  --task-ink: #fefae1;
+  --check-bg: #fefae1;
+  --check-ink: #364025;
+  --weather: linear-gradient(180deg, #ffe9a8 0%, #fefae1 60%);
+  --grow-bar: linear-gradient(90deg, #5a8a4a 0%, #c4d489 100%);
+  --tree-shadow-bottom: 4%;
+}
+
+body[data-season="autumn"] {
+  --bg: #f5e9d0;
+  --ink: #3a230f;
+  --ink-soft: #6b4a30;
+  --paper: #f9eed3;
+  --nav: #4a2614;
+  --nav-ink: #f7f4d5;
+  --accent: #dda25e;
+  --accent-2: #cd9388;
+  --panel: #e5d7c4;
+  --panel-stroke: #4a2614;
+  --task: #bc6c25;
+  --task-ink: #fefae1;
+  --check-bg: #fefae1;
+  --check-ink: #4a2614;
+  --weather: linear-gradient(180deg, #f5cfa0 0%, #f5e9d0 60%);
+  --grow-bar: linear-gradient(90deg, #bc6c25 0%, #f0c75e 100%);
+  --tree-shadow-bottom: 0%;
+}
+
+body[data-season="winter"] {
+  --bg: #e8eef2;
+  --ink: #1d2b3a;
+  --ink-soft: #4d5e74;
+  --paper: #f4f7fa;
+  --nav: #1d2b3a;
+  --nav-ink: #e8eef2;
+  --accent: #5e86ba;
+  --accent-2: #bbd2f6;
+  --panel: #cfd9e3;
+  --panel-stroke: #1d2b3a;
+  --task: #5e86ba;
+  --task-ink: #f4f7fa;
+  --check-bg: #f4f7fa;
+  --check-ink: #1d2b3a;
+  --weather: linear-gradient(180deg, #d6e3ee 0%, #e8eef2 60%);
+  --grow-bar: linear-gradient(90deg, #4068a8 0%, #bbd2f6 100%);
+  --tree-shadow-bottom: 9%;
+}

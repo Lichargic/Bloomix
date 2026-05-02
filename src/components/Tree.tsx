@@ -24,7 +24,6 @@ function AnimatedTree({ src, className = 'tree-canvas', mobile = false }: Animat
     let active = true
     let imageReady = false
     const img = new Image()
-    img.src = src
 
     function fitRect(width: number, height: number) {
       const iw = img.naturalWidth  || img.width
@@ -95,6 +94,12 @@ function AnimatedTree({ src, className = 'tree-canvas', mobile = false }: Animat
       resize()
       frame = window.requestAnimationFrame(draw)
     }
+
+    img.onerror = () => {
+      imageReady = false
+    }
+
+    img.src = src
 
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)

@@ -6,7 +6,7 @@ const BUTTON_CLASSES: Record<ButtonVariant, string> = {
   primary: 'btn-primary',
   ghost: 'btn-ghost',
   menu: 'menu-link',
-  danger: 'menu-link danger',
+  danger: 'btn-danger',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

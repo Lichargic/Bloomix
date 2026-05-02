@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { queryClient } from '../lib/queryClient'
 
 interface AuthContextValue {
   user: User | null
@@ -29,9 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => { /* no credentials configured */ })
       .finally(() => { setLoading(false) })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession)
       setUser(newSession?.user ?? null)
+
+      if (event === 'SIGNED_OUT') {
+        queryClient.clear()
+      }
     })
 
     return () => subscription.unsubscribe()

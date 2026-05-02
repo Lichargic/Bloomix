@@ -1,0 +1,223 @@
+/* ───────────────────────── Topbar ───────────────────────── */
+.topbar {
+  margin: 24px clamp(16px, 4vw, 80px) 0;
+  height: 84px;
+  border-radius: 49px;
+  background: var(--nav);
+  color: var(--nav-ink);
+  display: flex;
+  align-items: center;
+  padding: 0 36px;
+  gap: 28px;
+  position: relative;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18);
+}
+
+.topbar .brand {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--nav-ink);
+}
+.topbar .brand .brand-mark {
+  width: 64px; height: 64px;
+  object-fit: contain;
+  padding: 0;
+  border-radius: 10px;
+  filter:
+    drop-shadow(0 2px 0 rgba(0,0,0,.22))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--paper) 70%, transparent));
+  flex: none;
+}
+.topbar .brand .brand-word { font-size: 26px; line-height: 1; }
+
+.topbar .nav {
+  display: flex; gap: 4px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.topbar .nav :where(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 22px;
+  color: var(--nav-ink);
+  opacity: .7;
+  text-decoration: none;
+  transition: opacity .2s, background-color .2s, transform .12s;
+}
+.topbar .nav :where(a, button):hover { opacity: 1; }
+.topbar .nav :where(a, button).active {
+  background: var(--accent);
+  color: var(--ink);
+  opacity: 1;
+  box-shadow: 0 3px 0 rgba(0,0,0,.2);
+}
+.topbar .nav :where(a, button):active { transform: scale(0.95); }
+
+/* ── User button ── */
+.topbar .user { position: relative; }
+.topbar .user-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nav-ink);
+  transition: background-color .15s;
+}
+.topbar .user-btn:hover,
+.topbar .user-btn.open { background: rgba(255,255,255,.18); }
+.topbar .user-btn .avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent);
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 13px;
+  color: var(--ink);
+}
+.topbar .user-btn .user-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar .user-btn .user-caret {
+  width: 10px; height: 7px;
+  opacity: .7;
+  transition: transform .2s;
+}
+.topbar .user-btn.open .user-caret { transform: rotate(180deg); }
+
+/* ── Music button ── */
+.topbar .music-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  color: var(--nav-ink);
+  opacity: .7;
+  flex: none;
+  transition: opacity .2s, background-color .2s, transform .12s;
+}
+.topbar .music-btn:hover { opacity: 1; background: rgba(255,255,255,.12); }
+.topbar .music-btn:active { transform: scale(0.9); }
+.topbar .music-btn svg { width: 18px; height: 18px; }
+
+/* ── User dropdown menu ── */
+.user-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 280px;
+  background: var(--paper);
+  border: 2px solid var(--panel-stroke);
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgba(40, 30, 25, .22);
+  padding: 8px;
+  z-index: 50;
+  animation: menuPop .15s ease-out;
+  color: var(--ink);
+}
+@keyframes menuPop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.user-menu .menu-head { padding: 4px; margin-bottom: 4px; }
+.user-menu .menu-name-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--panel);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  text-align: left;
+  transition: border-color .15s;
+  color: var(--ink);
+}
+.user-menu .menu-name-row:hover { border-color: var(--panel-stroke); }
+.user-menu .menu-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent);
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 16px;
+  color: var(--ink);
+  border: 2px solid var(--panel-stroke);
+  flex: none;
+}
+.user-menu .menu-name-row b {
+  display: block; font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.user-menu .menu-name-row em {
+  display: block; font-size: 11px; font-style: normal;
+  color: var(--ink-soft); margin-top: 2px;
+}
+.user-menu .menu-name-input {
+  width: 100%;
+  font-size: 15px; font-weight: 600;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  color: var(--ink);
+}
+.user-menu .menu-name-input:focus-visible {
+  outline: 3px solid var(--panel-stroke);
+  outline-offset: 3px;
+}
+.user-menu .menu-sec {
+  padding: 8px 4px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+.user-menu .menu-sec:first-of-type { border-top: 0; padding-top: 4px; }
+.user-menu .menu-sec-h {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 600;
+  margin: 4px 8px 8px;
+}
+.user-menu .seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 4px;
+}
+.user-menu .seg button {
+  font-size: 12px; font-weight: 500;
+  padding: 8px 4px;
+  border-radius: 7px;
+  color: var(--ink-soft);
+  min-height: 32px;
+}
+.user-menu .seg button.on {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+.user-menu .menu-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 8px;
+}
+.user-menu .menu-toggle:hover { background: var(--panel); }
+.user-menu .menu-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.user-menu .menu-sec-foot {
+  padding: 4px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.user-menu .menu-link {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 12px;
+  font-size: 13px; color: var(--ink);
+  border-radius: 8px;
+  transition: background-color .12s;
+}
+.user-menu .menu-link:hover { background: var(--panel); }
+.user-menu .menu-link.danger { color: #b3463a; }
+.user-menu .menu-link.danger:hover { background: rgba(179, 70, 58, .08); }

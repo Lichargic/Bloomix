@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import { SEASONS } from "../lib/theme";
 import { getOptimizedImageUrl } from "../lib/imageSources";
 import { useAuth } from "../providers/AuthProvider";
 import { useTheme } from "../providers/ThemeProvider";
 import { useBackgroundMusic } from "../providers/AudioProvider";
-import { useProfile, useUpdateProfile } from "../hooks/useProfile";
+import { useProfile } from "../hooks/useProfile";
+import { useSignOut } from "../hooks/useSignOut";
 import { startMusicOnInteraction } from "../lib/audio";
 
 const NAV_ITEMS = [
@@ -20,13 +20,11 @@ export function Topbar() {
 	const navigate = useNavigate();
 	const { user } = useAuth();
 	const { data: profile } = useProfile();
-	const { season, tone, setTone, showCategories, setShowCategories } = useTheme();
-	const updateProfile = useUpdateProfile();
+	const { season } = useTheme();
+	const signOut = useSignOut();
 
 	const { muted, toggleMute } = useBackgroundMusic();
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [editingName, setEditingName] = useState(false);
-	const [draftName, setDraftName] = useState("");
 
 	const menuRef = useRef<HTMLDivElement>(null);
 	const userBtnRef = useRef<HTMLButtonElement>(null);
@@ -94,18 +92,9 @@ export function Topbar() {
 		}
 	}, [menuOpen]);
 
-	function saveName() {
-		const trimmed = draftName.trim();
-		if (trimmed && trimmed !== displayName) {
-			updateProfile.mutate({ display_name: trimmed });
-		}
-		setEditingName(false);
-	}
-
 	async function handleSignOut() {
 		setMenuOpen(false);
-		await supabase.auth.signOut();
-		navigate("/auth");
+		await signOut();
 	}
 
 	return (
@@ -182,72 +171,18 @@ export function Topbar() {
 					{menuOpen && (
 						<div className="user-menu" role="menu">
 							<div className="menu-head">
-								{editingName ?
-									<input
-										className="menu-name-input"
-										value={draftName}
-										autoFocus
-										onChange={(e) => setDraftName(e.target.value)}
-										onBlur={saveName}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") saveName();
-											if (e.key === "Escape") setEditingName(false);
-										}}
-									/>
-								:	<button
-										className="menu-name-row"
-										onClick={() => {
-											setDraftName(displayName);
-											setEditingName(true);
-										}}>
-										<span className="menu-avatar">{displayName.charAt(0).toUpperCase()}</span>
-										<span>
-											<b>{displayName}</b>
-											<em>tap to rename</em>
-										</span>
-									</button>
-								}
-							</div>
-
-							<div className="menu-sec">
-								<div className="menu-sec-h">Voice</div>
-								<div className="seg">
-									{(
-										[
-											{ v: "soft", l: "Soft" },
-											{ v: "whimsy", l: "Whimsy" },
-											{ v: "matter", l: "Plain" },
-										] as const
-									).map((o) => (
-										<button
-											key={o.v}
-											className={tone === o.v ? "on" : ""}
-											onClick={() => {
-												setTone(o.v);
-												updateProfile.mutate({ tone: o.v });
-											}}>
-											{o.l}
-										</button>
-									))}
+								<div className="menu-name-row">
+									<span className="menu-avatar">{displayName.charAt(0).toUpperCase()}</span>
+									<span>
+										<b>{displayName}</b>
+										<em>{user?.email ?? "Signed in"}</em>
+									</span>
 								</div>
-							</div>
-
-							<div className="menu-sec">
-								<label className="menu-toggle">
-									<input
-										type="checkbox"
-										checked={showCategories}
-										onChange={(e) => {
-											setShowCategories(e.target.checked);
-											updateProfile.mutate({ show_categories: e.target.checked });
-										}}
-									/>
-									<span>Show categories</span>
-								</label>
 							</div>
 
 							<div className="menu-sec menu-sec-foot">
 								<button
+									role="menuitem"
 									className="menu-link"
 									onClick={() => {
 										setMenuOpen(false);
@@ -255,7 +190,7 @@ export function Topbar() {
 									}}>
 									Settings
 								</button>
-								<button className="menu-link danger" onClick={handleSignOut}>
+								<button role="menuitem" className="menu-link danger" onClick={handleSignOut}>
 									Sign out
 								</button>
 							</div>

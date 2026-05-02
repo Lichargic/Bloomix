@@ -1,0 +1,160 @@
+/* ───────────────────────── Layout shell ───────────────────────── */
+:root {
+  --calendar-panel-height: clamp(430px, 48vw, 540px);
+  --today-grid-max: 1632px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.canvas {
+  flex: 1;
+  padding: 32px clamp(16px, 4vw, 80px);
+  display: grid;
+  gap: 32px;
+}
+
+.tree-region { min-width: 0; }
+
+/* ── Today grid ── */
+.today-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(340px, 400px);
+  width: 100%;
+  max-width: var(--today-grid-max);
+  gap: 32px;
+  align-items: stretch;
+  justify-self: center;
+}
+
+/* ── Calendar grid wrap ── */
+.cal-grid-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 600px) minmax(360px, 1fr);
+  gap: 28px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.task-list-fade {
+  flex: 1 1 50%;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ── Responsive ── */
+@media (max-width: 980px) {
+  .canvas { padding: 16px; }
+  .topbar { margin: 12px; padding: 0 18px; }
+  .topbar .nav :where(a, button) { padding: 8px 12px; font-size: 14px; }
+  .cal-grid-wrap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1100px) {
+  .today-grid { grid-template-columns: 1fr; }
+  .today-grid .checklist { min-height: auto; }
+  .today-grid .tree-stage { min-height: 460px; }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    height: auto;
+    min-height: 72px;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    border-radius: 28px;
+    padding: 12px 14px;
+  }
+  .topbar .brand .brand-word { display: none; }
+  .topbar .nav {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .topbar .nav :where(a, button) {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+  .topbar .user { margin-left: auto; }
+  .seed-stage { grid-template-columns: 1fr; }
+  .seed-hero-preview { min-height: 240px; }
+  .bag-cols { grid-template-columns: 1fr; }
+
+  .garden-archive-layout {
+    grid-template-columns: 1fr;
+    max-width: 620px;
+  }
+
+  .garden-archive-stats {
+    grid-template-rows: none;
+    grid-auto-rows: minmax(88px, auto);
+  }
+
+  .garden-archive-tree-frame {
+    width: min(100%, 420px);
+  }
+
+  .garden-archive-empty-copy {
+    text-align: center;
+  }
+}
+
+@media (min-width: 1101px) {
+  :root { --desktop-shell-height: 100dvh; }
+
+  html, body, #root {
+    height: var(--desktop-shell-height);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-shell {
+    height: var(--desktop-shell-height);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .canvas {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .today-grid { height: 100%; min-height: 0; }
+
+  .tree-region { display: flex; min-height: 0; }
+  .tree-region .tree-stage { flex: 1; width: 100%; height: 100%; min-height: 0; justify-content: center; }
+
+  .today-grid .checklist { height: 100%; min-height: 0; max-height: 100%; }
+
+  .checklist-lists { min-height: 0; }
+  .task-list { overflow-y: auto; }
+
+  .canvas.cal-canvas {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .canvas.cal-canvas .cal-grid-wrap { flex: 1; min-height: 0; }
+  .canvas.cal-canvas .calendar-shell { min-height: 0; overflow-y: auto; }
+  .canvas.cal-canvas .calendar-shell.month-shell,
+  .canvas.cal-canvas .calendar-shell.day-detail { height: 100%; }
+  .canvas.cal-canvas .cal-upcoming { flex: 0 0 auto; }
+
+  .tree-stage .ground { height: 42%; }
+  .tree-stage .hills { bottom: 32%; }
+}

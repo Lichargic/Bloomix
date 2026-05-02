@@ -3,7 +3,8 @@ import { Howl } from "howler";
 const MUTED_KEY = "bloomix-music-muted";
 
 function readMuted(): boolean {
-	return localStorage.getItem(MUTED_KEY) === "true";
+	if (typeof window === 'undefined') return false
+	return window.localStorage.getItem(MUTED_KEY) === "true";
 }
 
 export const bgMusic = new Howl({
@@ -26,7 +27,9 @@ export function isBgMuted(): boolean {
 }
 
 export function setBgMuted(muted: boolean): void {
-	localStorage.setItem(MUTED_KEY, String(muted));
+	if (typeof window !== 'undefined') {
+		window.localStorage.setItem(MUTED_KEY, String(muted));
+	}
 	bgMusic.mute(muted);
 	if (!muted && !bgMusic.playing()) bgMusic.play();
 }

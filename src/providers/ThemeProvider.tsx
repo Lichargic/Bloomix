@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { Season, Tone } from '../lib/theme'
 
 interface ThemeContextValue {
@@ -34,8 +34,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.body.setAttribute('data-season', season)
   }, [season])
 
+  const value = useMemo(
+    () => ({
+      season,
+      setSeason,
+      tone,
+      setTone,
+      showCategories,
+      setShowCategories,
+      showWeather,
+      setShowWeather,
+    }),
+    [season, tone, showCategories, showWeather],
+  )
+
   return (
-    <ThemeContext.Provider value={{ season, setSeason, tone, setTone, showCategories, setShowCategories, showWeather, setShowWeather }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   )

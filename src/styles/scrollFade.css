@@ -1,0 +1,126 @@
+/* Scroll fade effect container */
+.scroll-fade-v,
+.scroll-fade-h {
+  position: relative;
+  overflow: hidden;
+  /* Hide browser scrollbars */
+}
+
+/* Pseudo-elements (gradient overlays) */
+.scroll-fade-v::before,
+.scroll-fade-v::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.2s ease;
+}
+
+.scroll-fade-v::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent);
+}
+
+.scroll-fade-v::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg) 0%, transparent);
+}
+
+.scroll-fade-h::before,
+.scroll-fade-h::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.2s ease;
+}
+
+.scroll-fade-h::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 0%, transparent);
+}
+
+.scroll-fade-h::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 0%, transparent);
+}
+
+/* Fade overlays visible only when scrolling is possible at that edge */
+.scroll-fade-v.can-scroll-up::before,
+.scroll-fade-h.can-scroll-left::before {
+  opacity: 1;
+}
+
+.scroll-fade-v.can-scroll-down::after,
+.scroll-fade-h.can-scroll-right::after {
+  opacity: 1;
+}
+
+/* When no scrolling possible, hide overlay */
+.scroll-fade-v:not(.can-scroll-up)::before,
+.scroll-fade-h:not(.can-scroll-left)::before {
+  opacity: 0;
+}
+
+.scroll-fade-v:not(.can-scroll-down)::after,
+.scroll-fade-h:not(.can-scroll-right)::after {
+  opacity: 0;
+}
+
+/* Scrollable inner child – forced to fill the scroll-fade container */
+.scroll-fade-v > :first-child,
+.scroll-fade-h > :first-child {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  /* Optional hide native scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-fade-v > :first-child::-webkit-scrollbar,
+.scroll-fade-h > :first-child::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Checklist fade areas ──────────────────────────────── */
+.task-list-fade,
+.events-list-fade {
+  /* max-height will be set inline or via a separate rule */
+  max-height: 400px; /* adjust as needed */
+}
+
+/* ─── Calendar day detail ──────────────────────────────── */
+.day-detail-scroll-wrap,
+.calendar-events-fade {
+  max-height: 600px;
+}
+
+/* ─── Upcoming rail (horizontal) ──────────────────────────── */
+.upcoming-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.upcoming-rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Checklist scroll regions container ───────────────── */
+.checklist-scroll-regions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0; /* allow shrink */
+}

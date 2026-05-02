@@ -78,11 +78,13 @@ export function useToggleScheduledTask() {
 
   return useMutation({
     mutationFn: async ({ id, complete }: { id: string; complete: boolean }) => {
+      if (!user) throw new Error('Not authenticated')
       const now = new Date().toISOString()
       const { error } = await supabase
         .from('scheduled_tasks')
         .update({ completed_at: complete ? now : null })
         .eq('id', id)
+        .eq('user_id', user.id)
       if (error) throw error
     },
     onSettled: () => {
@@ -97,7 +99,12 @@ export function useDeleteScheduledTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('scheduled_tasks').delete().eq('id', id)
+      if (!user) throw new Error('Not authenticated')
+      const { error } = await supabase
+        .from('scheduled_tasks')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
       if (error) throw error
     },
     onSettled: () => {
@@ -112,7 +119,12 @@ export function useEditScheduledTask() {
 
   return useMutation({
     mutationFn: async ({ id, title }: { id: string; title: string }) => {
-      const { error } = await supabase.from('scheduled_tasks').update({ title }).eq('id', id)
+      if (!user) throw new Error('Not authenticated')
+      const { error } = await supabase
+        .from('scheduled_tasks')
+        .update({ title })
+        .eq('id', id)
+        .eq('user_id', user.id)
       if (error) throw error
     },
     onSettled: () => {

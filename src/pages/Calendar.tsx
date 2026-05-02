@@ -9,6 +9,8 @@ import { resolveTimezone, scheduledLocalDate } from '../lib/scheduledDates'
 import { getCategoryConfig } from '../lib/theme'
 import type { Category } from '../lib/theme'
 import { Topbar } from '../components/Topbar'
+import { useScrollFade } from '../hooks/useScrollFade'
+import { sortByCompletionThenAlpha } from '../lib/sort'
 import { ScheduledTaskModal } from '../components/ScheduledTaskModal'
 import {
   CALENDAR_EMPTY_STATES,
@@ -16,6 +18,16 @@ import {
   formatUpcomingEventWhen,
   getCalendarDayEmptyState,
 } from '../lib/pageModels/calendarModel'
+
+// ─── Param validators ─────────────────────────────────────────────────────────
+
+function isDateParam(value?: string): value is string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value ?? '')
+}
+
+function isMonthParam(value?: string): value is string {
+  return /^\d{4}-\d{2}$/.test(value ?? '')
+}
 
 // ─── Grid builder ─────────────────────────────────────────────────────────────
 
@@ -59,12 +71,12 @@ export function Calendar() {
   const today = currentDailyDay(timezone)
 
   const month = useMemo(() => {
-    if (dateParam?.length === 10) return dateParam.slice(0, 7)
-    if (dateParam?.length === 7)  return dateParam
+    if (isDateParam(dateParam)) return dateParam.slice(0, 7)
+    if (isMonthParam(dateParam)) return dateParam
     return today.slice(0, 7)
   }, [dateParam, today])
 
-  const selectedDay = dateParam?.length === 10 ? dateParam : null
+  const selectedDay = isDateParam(dateParam) ? dateParam : null
 
   const [y, m0] = useMemo(() => {
     const parts = month.split('-').map(Number)
@@ -80,10 +92,29 @@ export function Calendar() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const cellRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const railRef = useRef<HTMLDivElement>(null)
+  const railElementRef = useRef<HTMLDivElement | null>(null)
+  const railFadeRef = useScrollFade<HTMLDivElement>('horizontal')
+  const dayDetailRef = useScrollFade<HTMLDivElement>()
+
+  // Calendar should never sit in an unselected "Select a day" state.
+  // /calendar defaults to today; /calendar/YYYY-MM defaults to that month's first day.
+  useEffect(() => {
+    if (selectedDay) return
+
+    const defaultDay = isMonthParam(dateParam)
+      ? `${month}-01`
+      : today
+
+    navigate(`/calendar/${defaultDay}`, { replace: true })
+  }, [dateParam, month, navigate, selectedDay, today])
+
+  function setRailRef(el: HTMLDivElement | null) {
+    railElementRef.current = el
+    railFadeRef(el)
+  }
 
   useEffect(() => {
-    const rail = railRef.current
+    const rail = railElementRef.current
     if (!rail) return
     const onWheel = (e: WheelEvent) => {
       if (e.deltaX !== 0) return // let native horizontal scroll through
@@ -96,18 +127,27 @@ export function Calendar() {
 
   const monthName = new Date(y, m0, 1).toLocaleString('en', { month: 'long' }).toUpperCase()
 
+  function dateInTargetMonth(targetYear: number, targetMonth0: number) {
+    const sourceDay = selectedDay
+      ? Number(selectedDay.slice(8, 10))
+      : 1
+
+    const lastDay = new Date(targetYear, targetMonth0 + 1, 0).getDate()
+    const day = Math.min(sourceDay, lastDay)
+
+    return `${targetYear}-${String(targetMonth0 + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+
   function prevMonth() {
-    const prev = m0 === 0
-      ? `${y - 1}-12`
-      : `${y}-${String(m0).padStart(2, '0')}`
-    navigate(`/calendar/${prev}`)
+    const targetYear = m0 === 0 ? y - 1 : y
+    const targetMonth0 = m0 === 0 ? 11 : m0 - 1
+    navigate(`/calendar/${dateInTargetMonth(targetYear, targetMonth0)}`)
   }
 
   function nextMonth() {
-    const next = m0 === 11
-      ? `${y + 1}-01`
-      : `${y}-${String(m0 + 2).padStart(2, '0')}`
-    navigate(`/calendar/${next}`)
+    const targetYear = m0 === 11 ? y + 1 : y
+    const targetMonth0 = m0 === 11 ? 0 : m0 + 1
+    navigate(`/calendar/${dateInTargetMonth(targetYear, targetMonth0)}`)
   }
 
   function selectDay(dateStr: string) {
@@ -115,10 +155,6 @@ export function Calendar() {
   }
 
   function handleGridKey(e: React.KeyboardEvent) {
-    if (e.key === 'Escape' && selectedDay) {
-      navigate(`/calendar/${month}`)
-      return
-    }
     if (e.key === 't') {
       navigate(`/calendar/${today}`)
       return
@@ -147,8 +183,16 @@ export function Calendar() {
 
   // ─── Day detail data ─────────────────────────────────────────────────────────
   const selectedScheduled = useMemo(
-    () => scheduledTasks.filter(t => scheduledLocalDate(t.due_at, timezone) === selectedDay),
+    () => sortByCompletionThenAlpha(
+      scheduledTasks.filter(t => scheduledLocalDate(t.due_at, timezone) === selectedDay),
+      t => t.title
+    ),
     [scheduledTasks, selectedDay, timezone]
+  )
+
+  const upcomingTasks = useMemo(
+    () => scheduledTasks.filter(t => scheduledLocalDate(t.due_at, timezone) >= today),
+    [scheduledTasks, today, timezone]
   )
 
   const isPast   = !!selectedDay && selectedDay < today
@@ -242,8 +286,9 @@ export function Calendar() {
               <span>{selectedLabel}</span>
             </div>
 
-            <div className="day-detail-body">
-              {dayEmptyState && (
+            <div className="scroll-fade-v day-detail-scroll-wrap calendar-events-fade">
+            <div className="day-detail-body" ref={dayDetailRef}>
+              {selectedDay && dayEmptyState && (
                 <div className="calendar-empty">
                   <span className="calendar-empty-icon" aria-hidden="true">{dayEmptyState.icon}</span>
                   <h3>{dayEmptyState.title}</h3>
@@ -320,26 +365,28 @@ export function Calendar() {
                   </ul>
                 )}
 
-                {!dayEmptyState && (
-                  <button
-                    className="add-task-btn day-detail-add"
-                    onClick={() => setModalOpen(true)}
-                  >
-                    <span className="add-icon" aria-hidden="true">+</span>
-                    <span>Add event / deadline</span>
-                  </button>
-                )}
                 </>
               )}
             </div>
+            </div>{/* end day-detail-scroll-wrap */}
+            {selectedDay && !dayEmptyState && (
+              <button
+                className="add-task-btn day-detail-add"
+                onClick={() => setModalOpen(true)}
+              >
+                <span className="add-icon" aria-hidden="true">+</span>
+                <span>Add event / deadline</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* ─── Upcoming rail ────────────────────────────────────────────────── */}
         <div className="cal-upcoming">
           <h2 className="section-h">UPCOMING THIS MONTH</h2>
-          <div className="upcoming-rail" ref={railRef}>
-            {scheduledTasks.length === 0 && (
+          <div className="scroll-fade-h">
+          <div className="upcoming-rail" ref={setRailRef}>
+            {upcomingTasks.length === 0 && (
               <div className="upcoming-empty">
                 <span className="calendar-empty-icon" aria-hidden="true">{CALENDAR_EMPTY_STATES.quietMonth.icon}</span>
                 <div>
@@ -348,7 +395,7 @@ export function Calendar() {
                 </div>
               </div>
             )}
-            {scheduledTasks.map(t => {
+            {upcomingTasks.map(t => {
               const cat = getCategoryConfig(t.category as Category)
               const dateLabel = formatUpcomingEventWhen(t.due_at, t.all_day, timezone)
               return (
@@ -362,6 +409,7 @@ export function Calendar() {
               )
             })}
           </div>
+          </div>{/* end scroll-fade-h */}
         </div>
       </main>
 

@@ -1,0 +1,256 @@
+/* ───────────────────────── Tree stage ───────────────────────── */
+.tree-stage {
+  position: relative;
+  background: var(--weather);
+  border-radius: 28px;
+  padding: 32px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  min-height: 540px;
+  overflow: hidden;
+  border: 3px solid var(--panel-stroke);
+}
+
+.tree-stage .sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.tree-stage .ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(to bottom,
+      color-mix(in oklab, var(--accent-2) 30%, var(--panel)) 0%,
+      color-mix(in oklab, var(--accent-2) 42%, var(--panel)) 46%,
+      color-mix(in oklab, var(--accent-2) 54%, var(--panel)) 100%);
+  filter: saturate(.98);
+}
+
+.tree-stage .ground::before {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: -18%;
+  height: 34%;
+  border-radius: 50% 50% 0 0 / 72% 72% 0 0;
+  background:
+    radial-gradient(ellipse 70% 90% at 28% 100%,
+      color-mix(in oklab, var(--accent-2) 46%, var(--panel)) 0%,
+      color-mix(in oklab, var(--accent-2) 34%, var(--panel)) 68%,
+      transparent 72%),
+    radial-gradient(ellipse 78% 90% at 76% 100%,
+      color-mix(in oklab, var(--panel) 78%, var(--accent-2)) 0%,
+      color-mix(in oklab, var(--panel) 68%, var(--accent-2)) 70%,
+      transparent 74%);
+  opacity: .96;
+}
+
+.tree-stage .ground::after {
+  content: "";
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 18%;
+  height: 48%;
+  border-radius: 50% 50% 0 0 / 72% 72% 0 0;
+  background:
+    radial-gradient(ellipse 78% 100% at 50% 0%,
+      color-mix(in oklab, var(--accent-2) 48%, var(--panel)) 0%,
+      color-mix(in oklab, var(--accent-2) 38%, var(--panel)) 58%,
+      color-mix(in oklab, var(--panel) 70%, var(--accent-2)) 100%);
+  box-shadow:
+    0 -5px 14px rgba(0,0,0,.045),
+    inset 0 8px 18px color-mix(in oklab, var(--panel) 20%, transparent);
+}
+
+.tree-stage .hills {
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  bottom: 36%;
+  height: 108px;
+  background:
+    radial-gradient(ellipse 78% 78% at 26% 100%,
+      color-mix(in oklab, var(--accent-2) 30%, var(--panel)) 0%,
+      color-mix(in oklab, var(--accent-2) 20%, var(--panel)) 64%,
+      transparent 68%),
+    radial-gradient(ellipse 86% 82% at 78% 100%,
+      color-mix(in oklab, var(--panel) 74%, var(--accent-2)) 0%,
+      color-mix(in oklab, var(--panel) 62%, var(--accent-2)) 66%,
+      transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: .9;
+}
+
+.tree-stage .sky-mark {
+  position: absolute;
+  top: 24px; right: 28px;
+  z-index: 6;
+  font-size: 32px;
+  filter: drop-shadow(0 3px 0 rgba(0,0,0,.12));
+  animation: season-drift 9s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* ── Tree wrap ── */
+.tree-stage .tree-wrap {
+  position: relative;
+  width: min(480px, 88%);
+  min-width: 280px;
+  aspect-ratio: 1;
+  z-index: 3;
+  contain: layout paint;
+  transform: translateY(4%);
+}
+.tree-stage .tree-halo {
+  position: absolute;
+  inset: 6% 6% 12% 6%;
+  background: radial-gradient(circle at 50% 45%,
+    color-mix(in oklab, var(--accent) 50%, transparent) 0%,
+    transparent 65%);
+  opacity: var(--halo, .25);
+  filter: blur(20px);
+  transition: opacity 1s ease-out;
+  z-index: -1;
+  transform-origin: center;
+  animation: tree-glow-breathe 16s ease-in-out infinite;
+}
+.tree-stage .tree-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  image-rendering: auto;
+}
+.tree-stage .tree-bloom {
+  position: absolute;
+  font-size: 22px; line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.12));
+  transition: opacity .6s ease-out, transform .6s cubic-bezier(.2, 1.6, .4, 1);
+}
+
+/* ── Stage overlays ── */
+.tree-stage .stage-label {
+  position: absolute; left: 24px; top: 22px;
+  display: flex; gap: 10px; align-items: center;
+  font-size: 13px; font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--panel-stroke);
+  border-radius: 999px;
+  padding: 7px 14px;
+  white-space: nowrap;
+  z-index: 6;
+}
+.tree-stage .stage-label .dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+}
+.tree-stage .greeting {
+  position: absolute; left: 24px; right: 24px; bottom: 56px;
+  max-width: 60%;
+  background: var(--paper);
+  border: 1.5px solid var(--panel-stroke);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 15px; color: var(--ink); line-height: 1.5;
+  z-index: 6;
+}
+.tree-stage .greeting p { margin: 0; }
+
+/* ── Grow meter ── */
+.tree-stage .grow-meter {
+  position: absolute; left: 32px; right: 32px; bottom: 20px;
+  height: 8px;
+  background: rgba(0,0,0,.08);
+  border-radius: 999px; overflow: visible;
+  z-index: 6;
+}
+.tree-stage .grow-meter .grow-fill {
+  display: block; height: 100%;
+  background: var(--grow-bar);
+  border-radius: 999px;
+  transition: width .8s cubic-bezier(.2,.8,.2,1);
+  position: relative;
+}
+.tree-stage .grow-meter .sun {
+  position: absolute; right: -10px; top: -14px;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,.18));
+  animation: sun-bob 6s ease-in-out infinite;
+}
+.tree-stage .care-caption {
+  position: absolute; right: 32px; bottom: 34px;
+  z-index: 6;
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+  border: 1px solid var(--panel-stroke);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+/* ── Particles ── */
+.particle {
+  position: absolute;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1;
+  animation: fall linear infinite;
+  opacity: .9;
+  filter:
+    drop-shadow(0 2px 1px rgba(0,0,0,.16))
+    drop-shadow(0 0 5px color-mix(in oklab, var(--paper) 55%, transparent));
+  z-index: 1;
+  transform-origin: center;
+  text-shadow: 0 1px 0 rgba(255,255,255,.45);
+}
+.particle-summer {
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow:
+    0 0 10px currentColor,
+    0 0 18px color-mix(in oklab, currentColor 70%, transparent);
+  color: #f0c75e;
+  font-size: 7px !important;
+  text-indent: -999px;
+  overflow: hidden;
+}
+.particle-winter {
+  opacity: .92;
+  filter:
+    drop-shadow(0 1px 0 rgba(94,134,186,.24))
+    drop-shadow(0 0 5px rgba(255,255,255,.55));
+}
+
+/* ── Keyframes ── */
+@keyframes tree-glow-breathe {
+  0%, 100% { opacity: var(--halo, .25); transform: scale(1); }
+  50%      { opacity: calc(var(--halo, .25) * .82); transform: scale(.985); }
+}
+@keyframes season-drift {
+  0%,100% { transform: translate3d(0, 0, 0); }
+  50%     { transform: translate3d(0, -2px, 0); }
+}
+@keyframes sun-bob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-2px); }
+}
+@keyframes fall {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); }
+  12% { opacity: .78; }
+  48% { transform: translate3d(var(--sway, 20px), 310px, 0) rotate(calc(var(--spin, 1) * 130deg)); }
+  100% { opacity: 0; transform: translate3d(var(--dx, 30px), 660px, 0) rotate(calc(var(--spin, 1) * 290deg)); }
+}

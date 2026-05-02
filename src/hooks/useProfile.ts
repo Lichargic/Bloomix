@@ -7,11 +7,11 @@ export interface Profile {
   id: string
   display_name: string
   season: Season
-  tone: Tone
-  categories: Category[]
-  timezone: string
-  show_categories: boolean
-  show_weather: boolean
+  tone: Tone | null
+  categories: Category[] | null
+  timezone: string | null
+  show_categories: boolean | null
+  show_weather: boolean | null
   onboarded_at: string | null
   created_at: string
 }
@@ -67,6 +67,8 @@ export function useCreateProfile() {
         tone: input.tone ?? 'soft',
         categories: input.categories,
         timezone: input.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+        show_categories: true,
+        show_weather: true,
         onboarded_at: new Date().toISOString(),
       })
       if (error) throw error

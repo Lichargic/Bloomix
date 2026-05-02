@@ -1,7 +1,14 @@
+import type { Season } from '../theme'
+
 export interface GardenArchiveRecord {
+  id: string
+  season: Season
   days: number
   blooms: number
   tasks: number
+  archived_at: string
+  cycle_started_on: string | null
+  cycle_ended_on: string | null
 }
 
 interface GardenStats {
@@ -13,7 +20,7 @@ interface GardenStats {
 
 export const GARDEN_EMPTY_STATE = {
   title: 'No archived trees yet',
-  body: 'Your current tree is still growing. Finished trees will live here once they are archived.',
+  body: 'Keep tending your tree. Once a tree is archived, it will appear here as part of your garden.',
   actionLabel: 'Return to today',
 } as const
 

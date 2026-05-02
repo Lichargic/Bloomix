@@ -5,6 +5,7 @@ import { useAuth } from '../providers/AuthProvider'
 import { useProfile } from './useProfile'
 import { currentDailyDay } from '../lib/dates'
 import type { Category } from '../lib/theme'
+import { GARDEN_ACTIVITY_BASE_KEY } from './useGardenArchive'
 
 export interface DailyTask {
   id: string
@@ -48,7 +49,11 @@ const TENDED_DAYS_KEY = (userId: string) => ['tree_tended_days', userId] as cons
 const COMPLETIONS_KEY = (userId: string) => ['daily_task_completions', userId] as const
 
 export function dailyTasksChannelName(userId: string) {
-  return `daily_tasks:${userId}:${crypto.randomUUID()}`
+  const id =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  return `daily_tasks:${userId}:${id}`
 }
 
 export function normalizeDailyTasksForToday(tasks: DailyTask[], today: string): DailyTask[] {
@@ -179,6 +184,7 @@ function useInvalidateDailyTaskQueries() {
     queryClient.invalidateQueries({ queryKey: BASE_KEY(user.id) })
     queryClient.invalidateQueries({ queryKey: COMPLETIONS_KEY(user.id) })
     queryClient.invalidateQueries({ queryKey: TENDED_DAYS_KEY(user.id) })
+    queryClient.invalidateQueries({ queryKey: GARDEN_ACTIVITY_BASE_KEY(user.id) })
   }
 }
 
@@ -209,6 +215,7 @@ export function useToggleDailyTask() {
 
   return useMutation({
     mutationFn: async ({ id, complete }: { id: string; complete: boolean }) => {
+      if (!user) throw new Error('Not authenticated')
       const { error } = complete
         ? await supabase.rpc('complete_daily_task', { p_task_id: id })
         : await supabase.rpc('uncomplete_daily_task', { p_task_id: id })
@@ -238,7 +245,12 @@ export function useEditDailyTask() {
 
   return useMutation({
     mutationFn: async ({ id, text }: { id: string; text: string }) => {
-      const { error } = await supabase.from('daily_tasks').update({ text }).eq('id', id)
+      if (!user) throw new Error('Not authenticated')
+      const { error } = await supabase
+        .from('daily_tasks')
+        .update({ text })
+        .eq('id', id)
+        .eq('user_id', user.id)
       if (error) throw error
     },
     onMutate: async ({ id, text }) => {
@@ -265,7 +277,12 @@ export function useDeleteDailyTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('daily_tasks').delete().eq('id', id)
+      if (!user) throw new Error('Not authenticated')
+      const { error } = await supabase
+        .from('daily_tasks')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
       if (error) throw error
     },
     onMutate: async (id) => {

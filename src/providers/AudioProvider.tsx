@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { isBgMuted, setBgMuted } from '../lib/audio'
 
 interface AudioContextValue {
@@ -19,8 +19,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const value = useMemo(() => ({ muted, toggleMute }), [muted, toggleMute])
+
   return (
-    <AudioContext.Provider value={{ muted, toggleMute }}>
+    <AudioContext.Provider value={value}>
       {children}
     </AudioContext.Provider>
   )

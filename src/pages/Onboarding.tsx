@@ -85,7 +85,7 @@ export function Onboarding() {
     return (
       <div className="welcome" data-screen-label="01 Welcome">
         <main id="main-content" className="welcome-card fade-in">
-          <OptimizedImage src={SEASONS.spring.logo} alt="" className="logo" width={300} height={300} loading="eager" />
+          <OptimizedImage src={SEASONS.winter.logo} alt="" className="logo" width={300} height={300} loading="eager" />
           <h1 className="bloomix-mark">Bloomix</h1>
           <p className="tagline">
             A calm productivity app for the students and the stressed.<br />Rewards effort, not perfection.

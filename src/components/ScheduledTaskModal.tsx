@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { CATEGORIES } from '../lib/theme'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { CATEGORIES, getCategoryConfig, normalizeCategoryName } from '../lib/theme'
 import type { Category } from '../lib/theme'
 import { useCreateScheduledTask } from '../hooks/useScheduledTasks'
 import { useProfile } from '../hooks/useProfile'
@@ -21,6 +21,23 @@ export function ScheduledTaskModal({ defaultDate, onClose }: Props) {
   const [dueTime, setDueTime] = useState('09:00')
   const [category, setCategory] = useState<Category>('routines')
   const [notes, setNotes] = useState('')
+
+  const categoryOptions = useMemo<Category[]>(() => {
+    const seen = new Set<Category>()
+    const options: Category[] = []
+
+    const addCategory = (value: string) => {
+      const normalized = normalizeCategoryName(value)
+      if (!normalized || seen.has(normalized)) return
+      seen.add(normalized)
+      options.push(normalized)
+    }
+
+    ;(profile?.categories?.length ? profile.categories : Object.keys(CATEGORIES)).forEach(addCategory)
+    Object.keys(CATEGORIES).forEach(addCategory)
+
+    return options
+  }, [profile?.categories])
 
   useEffect(() => { firstRef.current?.focus() }, [])
 
@@ -45,14 +62,20 @@ export function ScheduledTaskModal({ defaultDate, onClose }: Props) {
   }
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Add event or deadline">
+    <div
+      className="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Add event or deadline"
+      onClick={onClose}
+    >
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <div className="modal-head">
           <div>
             <span>Add event or deadline</span>
             <span className="head-subtitle" style={{ display: 'block' }}>One-time · tied to a specific date</span>
           </div>
-          <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <form className="modal-form" onSubmit={handleSubmit}>
           <label className="form-field">
@@ -106,8 +129,10 @@ export function ScheduledTaskModal({ defaultDate, onClose }: Props) {
               value={category}
               onChange={e => setCategory(e.target.value as Category)}
             >
-              {(Object.entries(CATEGORIES) as [Category, typeof CATEGORIES[Category]][]).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
+              {categoryOptions.map(option => (
+                <option key={option} value={option}>
+                  {getCategoryConfig(option).label}
+                </option>
               ))}
             </select>
           </label>

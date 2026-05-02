@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Topbar } from '../components/Topbar'
-import { supabase } from '../lib/supabase'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useProfile, useUpdateProfile } from '../hooks/useProfile'
 import { useTheme } from '../providers/ThemeProvider'
-import { useBackgroundMusic } from '../providers/AudioProvider'
+import { useSignOut } from '../hooks/useSignOut'
+import { useAuth } from '../providers/AuthProvider'
 import type { Tone } from '../lib/theme'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -18,22 +17,31 @@ const TONE_OPTIONS: { value: Tone; label: string }[] = [
 
 export function Settings() {
   useDocumentTitle('Settings')
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const { data: profile } = useProfile()
   const updateProfile = useUpdateProfile()
-  const { tone, setTone, showCategories, setShowCategories } = useTheme()
-  const { muted, toggleMute } = useBackgroundMusic()
+  const {
+    tone,
+    setTone,
+    showCategories,
+    setShowCategories,
+    showWeather,
+    setShowWeather,
+  } = useTheme()
+  const signOut = useSignOut()
   const [draftName, setDraftName] = useState('')
   const [editingName, setEditingName] = useState(false)
 
   const displayName = profile?.display_name ?? ''
   const currentName = editingName ? draftName : displayName
 
+  const trimmedName = currentName.trim()
+  const nameHasChanges = Boolean(trimmedName && trimmedName !== displayName)
+
   function saveName(e: React.FormEvent) {
     e.preventDefault()
-    const trimmed = currentName.trim()
-    if (trimmed && trimmed !== displayName) {
-      updateProfile.mutate({ display_name: trimmed })
+    if (nameHasChanges) {
+      updateProfile.mutate({ display_name: trimmedName })
     }
     setEditingName(false)
   }
@@ -48,91 +56,133 @@ export function Settings() {
     updateProfile.mutate({ show_categories: nextValue })
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    navigate('/auth')
+  function toggleWeather(nextValue: boolean) {
+    setShowWeather(nextValue)
+    updateProfile.mutate({ show_weather: nextValue })
   }
 
   return (
     <div className="app-shell">
       <Topbar />
-      <main id="main-content" className="canvas fade-in" data-screen-label="Settings">
-        <section aria-labelledby="settings-title">
-          <h1 id="settings-title" className="section-title">Settings</h1>
-          <p className="section-sub">Keep Bloomix tuned to how you work.</p>
-        </section>
+      <main id="main-content" className="canvas settings-canvas fade-in" data-screen-label="Settings">
+        <h1 className="sr-only">Settings</h1>
 
-        <div className="settings-grid">
-          <section className="settings-panel" aria-labelledby="settings-profile-title">
-            <h2 id="settings-profile-title" className="section-h">Profile</h2>
-            <form className="settings-form" onSubmit={saveName}>
-              <label className="settings-field">
-                <span>Display name</span>
-                <Input
-                  value={currentName}
-                  onChange={e => {
-                    setEditingName(true)
-                    setDraftName(e.target.value)
-                  }}
-                  autoComplete="name"
-                />
-              </label>
-              <Button type="submit" disabled={!currentName.trim() || updateProfile.isPending}>
-                Save name
-              </Button>
-            </form>
-            <div className="settings-readonly">
-              <span>Timezone</span>
-              <b>{profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone}</b>
-            </div>
-          </section>
+        <div className="settings-board">
+          <section className="settings-sheet" aria-label="Main settings">
+            <section className="settings-section" aria-labelledby="settings-profile-title">
+              <div className="settings-copy">
+                <h2 id="settings-profile-title" className="section-h">Profile</h2>
+                <p>Your display name</p>
+              </div>
 
-          <section className="settings-panel" aria-labelledby="settings-preferences-title">
-            <h2 id="settings-preferences-title" className="section-h">Preferences</h2>
-            <div className="settings-group">
-              <span className="settings-label">Voice</span>
-              <div className="seg" aria-label="Voice tone">
+              <form className="settings-name-form" onSubmit={saveName}>
+                <label className="settings-field">
+                  <span>Display name</span>
+                  <Input
+                    value={currentName}
+                    onChange={e => {
+                      setEditingName(true)
+                      setDraftName(e.target.value)
+                    }}
+                    autoComplete="name"
+                  />
+                </label>
+
+                <div className="settings-actions">
+                  <Button type="submit" disabled={!nameHasChanges || updateProfile.isPending}>
+                    Save
+                  </Button>
+                  {editingName && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setDraftName(displayName)
+                        setEditingName(false)
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </section>
+
+            <section className="settings-section" aria-labelledby="settings-voice-title">
+              <div className="settings-copy">
+                <h2 id="settings-voice-title" className="section-h">Voice</h2>
+                <p>How Bloomix speaks to you</p>
+              </div>
+
+              <div className="seg settings-seg" aria-label="Voice tone">
                 {TONE_OPTIONS.map(option => (
                   <button
                     key={option.value}
                     type="button"
                     className={tone === option.value ? 'on' : ''}
+                    aria-pressed={tone === option.value}
                     onClick={() => chooseTone(option.value)}
                   >
                     {option.label}
                   </button>
                 ))}
               </div>
+            </section>
+
+            <section className="settings-section" aria-labelledby="settings-categories-title">
+              <div className="settings-copy">
+                <h2 id="settings-categories-title" className="section-h">Categories</h2>
+                <p>Category labels on tasks</p>
+              </div>
+
+              <label className="settings-switch">
+                <span>{showCategories ? 'Shown' : 'Hidden'}</span>
+                <input
+                  type="checkbox"
+                  checked={showCategories}
+                  onChange={e => toggleCategories(e.target.checked)}
+                />
+              </label>
+            </section>
+
+            <section className="settings-section" aria-labelledby="settings-weather-title">
+              <div className="settings-copy">
+                <h2 id="settings-weather-title" className="section-h">Weather</h2>
+                <p>Weather widget on Today</p>
+              </div>
+
+              <label className="settings-switch">
+                <span>{showWeather ? 'Shown' : 'Hidden'}</span>
+                <input
+                  type="checkbox"
+                  checked={showWeather}
+                  onChange={e => toggleWeather(e.target.checked)}
+                />
+              </label>
+            </section>
+          </section>
+
+          <aside className="settings-sheet settings-sheet--side" aria-label="Account settings">
+            <div className="settings-identity">
+              <div className="settings-avatar" aria-hidden="true">
+                {(displayName || user?.email || '?')[0].toUpperCase()}
+              </div>
+              <div className="settings-identity-meta">
+                {displayName && <b>{displayName}</b>}
+                {user?.email && <span>{user.email}</span>}
+              </div>
             </div>
 
-            <label className="menu-toggle settings-toggle">
-              <input
-                type="checkbox"
-                checked={showCategories}
-                onChange={e => toggleCategories(e.target.checked)}
-              />
-              <span>Show categories</span>
-            </label>
-          </section>
+            <section className="settings-section settings-section--side" aria-labelledby="settings-account-title">
+              <div className="settings-copy">
+                <h2 id="settings-account-title" className="section-h">Account</h2>
+              </div>
 
-          <section className="settings-panel" aria-labelledby="settings-audio-title">
-            <h2 id="settings-audio-title" className="section-h">Audio</h2>
-            <label className="menu-toggle settings-toggle">
-              <input
-                type="checkbox"
-                checked={!muted}
-                onChange={toggleMute}
-              />
-              <span>Background music</span>
-            </label>
-          </section>
-
-          <section className="settings-panel" aria-labelledby="settings-account-title">
-            <h2 id="settings-account-title" className="section-h">Account</h2>
-            <Button variant="danger" className="settings-danger" onClick={handleSignOut}>
-              Sign out
-            </Button>
-          </section>
+              <Button variant="danger" className="settings-danger" onClick={signOut}>
+                Sign out
+              </Button>
+            </section>
+          </aside>
         </div>
       </main>
     </div>

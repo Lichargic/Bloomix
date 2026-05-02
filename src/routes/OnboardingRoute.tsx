@@ -5,6 +5,6 @@ export function OnboardingRoute() {
   const { data: profile, isLoading } = useProfile()
 
   if (isLoading) return null
-  if (profile) return <Navigate to="/today" replace />
+  if (profile?.onboarded_at) return <Navigate to="/today" replace />
   return <Outlet />
 }

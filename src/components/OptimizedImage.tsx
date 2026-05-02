@@ -21,8 +21,8 @@ export function OptimizedImage({
 
   return (
     <picture>
-      <source type="image/avif" srcSet={sources.avif} />
-      <source type="image/webp" srcSet={sources.webp} />
+      {sources.avif && <source type="image/avif" srcSet={sources.avif} />}
+      {sources.webp && <source type="image/webp" srcSet={sources.webp} />}
       <img
         src={sources.fallback}
         alt={alt}

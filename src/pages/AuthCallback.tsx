@@ -26,11 +26,18 @@ export function AuthCallback() {
       return
     }
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).catch(() => {
+    if (!code) {
+      navigate('/auth?error=expired', { replace: true })
+      return
+    }
+
+    void supabase.auth.exchangeCodeForSession(code)
+      .then(({ error: exchangeError }) => {
+        if (exchangeError) navigate('/auth?error=expired', { replace: true })
+      })
+      .catch(() => {
         navigate('/auth?error=expired', { replace: true })
       })
-    }
   }, [navigate, searchParams])
 
   // Redirect once we have a confirmed session + profile result

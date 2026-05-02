@@ -1,56 +1,133 @@
 import { Link } from 'react-router-dom'
 import { Topbar } from '../components/Topbar'
 import { SEASONS } from '../lib/theme'
-import { useProfile } from '../hooks/useProfile'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useTheme } from '../providers/ThemeProvider'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { GARDEN_EMPTY_STATE, getGardenStats } from '../lib/pageModels/gardenModel'
+import { useGardenActivityStats, useGardenArchive } from '../hooks/useGardenArchive'
+import { getTreeCycleProgress } from '../lib/growth'
 
 export function Garden() {
   useDocumentTitle('Garden')
-  const { data: profile } = useProfile()
-  const { season } = useTheme()
-  const activeSeason = profile?.season ?? season
-  const activeTree = SEASONS[activeSeason]
-  const stats = getGardenStats([])
+
+  const {
+    data: archives = [],
+    isLoading: isArchivesLoading,
+    isError: isArchivesError,
+    error: archivesError,
+  } = useGardenArchive()
+
+  const featuredTree = archives[0] ?? null
+  const featuredSeason = featuredTree ? SEASONS[featuredTree.season] : null
+  const latestArchiveEnd = featuredTree?.cycle_ended_on ?? null
+
+  const {
+    data: activityStats = { days: 0, tasks: 0 },
+    isLoading: isActivityLoading,
+    isError: isActivityError,
+    error: activityError,
+  } = useGardenActivityStats(latestArchiveEnd)
+
+  const archiveStats = getGardenStats(archives)
+  const activeGrowth = getTreeCycleProgress(activityStats.days)
+  const activeBlooms = [20, 35, 55, 70, 85].filter(mark => activeGrowth >= mark).length
+
+  const stats = {
+    trees: archiveStats.trees,
+    days: archiveStats.days + activityStats.days,
+    blooms: archiveStats.blooms + activeBlooms,
+    tasks: archiveStats.tasks + activityStats.tasks,
+  }
+
+  const isGardenLoading = isArchivesLoading || isActivityLoading
+  const gardenError = isArchivesError
+    ? archivesError
+    : isActivityError
+      ? activityError
+      : null
 
   return (
     <div className="app-shell">
       <Topbar />
       <main id="main-content" className="canvas fade-in" data-screen-label="Garden">
-        <section aria-labelledby="garden-title">
-          <h1 id="garden-title" className="section-title">GARDEN</h1>
-          <p className="section-sub">A quiet archive for trees you have finished growing.</p>
-        </section>
+        <section className="garden-archive-layout" aria-label="Garden archive">
+          <div className="garden-archive-card">
+            {isGardenLoading ? (
+              <div className="garden-archive-loading">Loading your garden…</div>
+            ) : gardenError ? (
+              <div className="garden-archive-empty">
+                <div className="garden-archive-tree-frame garden-archive-tree-frame-empty">
+                  <span aria-hidden="true">!</span>
+                </div>
 
-        <section className="garden-stats" aria-label="Garden summary">
-          <div className="g-stat">
-            <b>{stats.trees}</b>
-            <span>trees grown</span>
-          </div>
-          <div className="g-stat">
-            <b>{stats.days}</b>
-            <span>days tended</span>
-          </div>
-          <div className="g-stat">
-            <b>{stats.blooms}</b>
-            <span>blooms</span>
-          </div>
-          <div className="g-stat">
-            <b>{stats.tasks}</b>
-            <span>tasks done</span>
-          </div>
-        </section>
+                <div className="garden-archive-empty-copy">
+                  <span className="garden-archive-kicker">Garden archive</span>
+                  <h2>Unable to load garden</h2>
+                  <p>{gardenError instanceof Error ? gardenError.message : 'Please try again in a moment.'}</p>
+                </div>
+              </div>
+            ) : featuredTree && featuredSeason ? (
+              <>
+                <div className="garden-archive-tree-frame">
+                  <OptimizedImage
+                    src={featuredSeason.treeImg}
+                    alt={`${featuredSeason.label} archived tree`}
+                    className="garden-archive-tree"
+                    width={520}
+                    height={520}
+                    loading="eager"
+                  />
+                </div>
 
-        <section className="empty-state-card garden-empty-card" aria-label="Empty garden">
-          <OptimizedImage src={activeTree.treeImg} alt="" className="garden-empty-tree" width={180} height={180} />
-          <div className="garden-empty-copy">
-            <span className="empty-kicker">Current tree</span>
-            <h3>{GARDEN_EMPTY_STATE.title}</h3>
-            <p>{GARDEN_EMPTY_STATE.body}</p>
-            <Link className="empty-action" to="/today">{GARDEN_EMPTY_STATE.actionLabel}</Link>
+                <div className="garden-archive-meta">
+                  <span className="garden-archive-kicker">Archived tree</span>
+                  <h2>{featuredSeason.label} tree</h2>
+                  <p>
+                    Archived on{' '}
+                    {new Date(featuredTree.archived_at).toLocaleDateString(undefined, {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="garden-archive-empty">
+                <div className="garden-archive-tree-frame garden-archive-tree-frame-empty">
+                  <span aria-hidden="true">✿</span>
+                </div>
+
+                <div className="garden-archive-empty-copy">
+                  <span className="garden-archive-kicker">Garden archive</span>
+                  <h2>{GARDEN_EMPTY_STATE.title}</h2>
+                  <p>{GARDEN_EMPTY_STATE.body}</p>
+                  <Link className="garden-archive-action" to="/today">
+                    {GARDEN_EMPTY_STATE.actionLabel}
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
+
+          <aside className="garden-archive-stats" aria-label="Garden summary">
+            <div className="garden-archive-stat-card">
+              <b>{stats.tasks}</b>
+              <span>tasks done</span>
+            </div>
+            <div className="garden-archive-stat-card">
+              <b>{stats.days}</b>
+              <span>days tended</span>
+            </div>
+            <div className="garden-archive-stat-card">
+              <b>{stats.blooms}</b>
+              <span>blooms</span>
+            </div>
+            <div className="garden-archive-stat-card">
+              <b>{stats.trees}</b>
+              <span>trees grown</span>
+            </div>
+          </aside>
         </section>
       </main>
     </div>

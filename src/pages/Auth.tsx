@@ -5,20 +5,10 @@ import { sendMagicLink, signInWithGoogle } from '../lib/auth'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { SEASONS } from '../lib/theme'
-import type { Season } from '../lib/theme'
 
 type AuthView = 'form' | 'sent'
 
-function currentSeason(): Season {
-  const month = new Date().getMonth() // 0-indexed
-  if (month <= 2) return 'winter'
-  if (month <= 5) return 'spring'
-  if (month <= 8) return 'summer'
-  return 'autumn'
-}
-
-const season = currentSeason()
-const logo = SEASONS[season].logo
+const logo = SEASONS.winter.logo
 
 export function Auth() {
   useDocumentTitle('Sign in')
@@ -35,8 +25,10 @@ export function Auth() {
     setLoading(true)
     setFormError(null)
     try {
-      const result = await sendMagicLink(supabase.auth, email, window.location.origin)
+      const normalizedEmail = email.trim().toLowerCase()
+      const result = await sendMagicLink(supabase.auth, normalizedEmail, window.location.origin)
       if (!result.ok) { setFormError(result.message); return }
+      setEmail(normalizedEmail)
       setView('sent')
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Could not send a login email.')
@@ -84,7 +76,11 @@ export function Auth() {
         <div className="auth-actions">
           <button
             className="cta-google"
-            onClick={() => signInWithGoogle(window.location.origin)}
+            onClick={async () => {
+              setFormError(null)
+              const result = await signInWithGoogle(window.location.origin)
+              if (!result.ok) setFormError(result.message)
+            }}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" style={{ flexShrink: 0 }}>
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
