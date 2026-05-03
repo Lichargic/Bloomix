@@ -4,10 +4,6 @@ export interface OptimizedImageSources {
 	fallback: string;
 }
 
-export function stripExtension(src: string) {
-	return src.replace(/\.[a-z0-9]+$/i, "");
-}
-
 export function getOptimizedImageSources(src: string): OptimizedImageSources {
 	return {
 		avif: "",

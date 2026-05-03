@@ -1,37 +1,35 @@
-import { useEffect } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
-import { useProfile } from '../hooks/useProfile'
-import { useTheme } from '../providers/ThemeProvider'
+import { useEffect } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useProfile } from "../hooks/useProfile";
+import { useTheme } from "../providers/ThemeProvider";
 
 export function ProfileRoute() {
-  const { data: profile, isLoading } = useProfile()
-  const {
-    setSeason,
-    setTone,
-    setShowCategories,
-    setShowWeather,
-  } = useTheme()
+	const { data: profile, isLoading } = useProfile();
+	const { setSeason, setTone, setTreeShape, setShowCategories, setShowWeather } = useTheme();
 
-  useEffect(() => {
-    if (!profile?.onboarded_at) return
+	useEffect(() => {
+		if (!profile?.onboarded_at) return;
 
-    setSeason(profile.season ?? 'spring')
-    setTone(profile.tone ?? 'soft')
-    setShowCategories(profile.show_categories ?? true)
-    setShowWeather(profile.show_weather ?? true)
-  }, [
-    profile?.onboarded_at,
-    profile?.season,
-    profile?.tone,
-    profile?.show_categories,
-    profile?.show_weather,
-    setSeason,
-    setTone,
-    setShowCategories,
-    setShowWeather,
-  ])
+		setSeason(profile.season ?? "spring");
+		setTone(profile.tone ?? "soft");
+		setTreeShape(profile.tree_shape ?? "shape-1");
+		setShowCategories(profile.show_categories ?? true);
+		setShowWeather(profile.show_weather ?? true);
+	}, [
+		profile?.onboarded_at,
+		profile?.season,
+		profile?.tone,
+		profile?.tree_shape,
+		profile?.show_categories,
+		profile?.show_weather,
+		setSeason,
+		setTone,
+		setTreeShape,
+		setShowCategories,
+		setShowWeather,
+	]);
 
-  if (isLoading) return null
-  if (!profile?.onboarded_at) return <Navigate to="/onboarding" replace />
-  return <Outlet />
+	if (isLoading) return null;
+	if (!profile?.onboarded_at) return <Navigate to="/onboarding" replace />;
+	return <Outlet />;
 }
