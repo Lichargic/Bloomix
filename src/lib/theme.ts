@@ -1,7 +1,8 @@
 export type Season = "spring" | "summer" | "autumn" | "winter";
 export type Tone = "soft" | "whimsy" | "matter";
-export type TreeShape = "shape-1" | "shape-2";
+export type TreeShape = "shape-1" | "shape-2" | "shape-3";
 export type Category = string;
+
 
 export function getTreeStages(season: Season, shape: TreeShape): readonly string[] {
 	return [0, 1, 2, 3, 4, 5, 6].map((i) => `/assets/trees/${shape}/${season}/stage-${i}.png`);

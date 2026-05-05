@@ -56,9 +56,14 @@ export function AuthCallback() {
 		if (!user) return;
 
 		if (!profile?.onboarded_at) {
+			sessionStorage.removeItem('auth:redirect_to');
 			navigate("/onboarding", { replace: true });
 		} else {
-			navigate("/today", { replace: true });
+			const saved = sessionStorage.getItem('auth:redirect_to');
+			sessionStorage.removeItem('auth:redirect_to');
+			// Only redirect to internal protected paths — never back to /auth or /
+			const target = saved && /^\/(?!auth(\?|$)|$)/.test(saved) ? saved : '/today';
+			navigate(target, { replace: true });
 		}
 	}, [user, authLoading, profile, profileLoading, navigate]);
 

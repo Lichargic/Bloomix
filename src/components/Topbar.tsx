@@ -120,7 +120,7 @@ export function Topbar() {
 				</nav>
 
 				<button
-					className="music-btn"
+					className={`music-btn${!muted ? " is-playing" : ""}`}
 					onClick={toggleMute}
 					aria-label={muted ? "Unmute music" : "Mute music"}
 					aria-pressed={!muted}>

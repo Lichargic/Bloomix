@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useReducer } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import { useProfile } from "../hooks/useProfile";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -26,10 +26,10 @@ export function Today() {
 
 	// Visual stage and growth only increase within a session — completing then
 	// unchecking the first task of the day should not revert the tree animation.
-	const peakStageRef = useRef(treeStage);
-	const peakGrowthRef = useRef(treeGrowth);
-	peakStageRef.current = Math.max(peakStageRef.current, treeStage);
-	peakGrowthRef.current = Math.max(peakGrowthRef.current, treeGrowth);
+	const [peakStage, bumpStage]   = useReducer((s: number, n: number) => Math.max(s, n), treeStage);
+	const [peakGrowth, bumpGrowth] = useReducer((g: number, n: number) => Math.max(g, n), treeGrowth);
+	if (treeStage  > peakStage)  bumpStage(treeStage);
+	if (treeGrowth > peakGrowth) bumpGrowth(treeGrowth);
 
 	const greeting = useMemo(() => {
 		const name = profile?.display_name ?? user?.email ?? "friend";
@@ -55,8 +55,8 @@ export function Today() {
 					<section className="tree-region" aria-label="Bloomix tree progress">
 						<TreeStage
 							season={season}
-							growth={peakGrowthRef.current}
-							treeStage={peakStageRef.current}
+							growth={peakGrowth}
+							treeStage={peakStage}
 							tendedDays={tendedDays}
 							todayCare={pct}
 							greeting={greeting}

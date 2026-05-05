@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { sendMagicLink, signInWithGoogle } from "../lib/auth";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { OptimizedImage } from "../components/OptimizedImage";
 import { SEASONS } from "../lib/theme";
+import { useTheme } from "../providers/ThemeProvider";
 
 type AuthView = "form" | "sent";
 
-const logo = SEASONS.winter.logo;
-
 export function Auth() {
+	const { season } = useTheme();
+	const logo = SEASONS[season].logo;
 	useDocumentTitle("Sign in");
 	const [email, setEmail] = useState("");
 	const [view, setView] = useState<AuthView>("form");
@@ -44,7 +45,9 @@ export function Auth() {
 		return (
 			<div className="welcome" data-screen-label="Auth: check inbox">
 				<main id="main-content" className="welcome-card fade-in">
-					<OptimizedImage src={logo} alt="" className="logo" width={300} height={300} loading="eager" />
+					<Link to="/" aria-label="Go to homepage">
+						<OptimizedImage src={logo} alt="" className="logo" width={300} height={300} loading="eager" />
+					</Link>
 					<h1 className="bloomix-mark">check your inbox</h1>
 					<p className="tagline">
 						We sent a magic link to
@@ -65,7 +68,9 @@ export function Auth() {
 	return (
 		<div className="welcome" data-screen-label="Auth">
 			<main id="main-content" className="welcome-card fade-in">
-				<OptimizedImage src={logo} alt="" className="logo" width={300} height={300} loading="eager" />
+				<Link to="/" aria-label="Go to homepage">
+					<OptimizedImage src={logo} alt="" className="logo" width={300} height={300} loading="eager" />
+				</Link>
 				<h1 className="bloomix-mark">Bloomix</h1>
 				<p className="tagline">
 					Grow a little tree alongside your habits.

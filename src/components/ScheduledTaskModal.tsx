@@ -36,7 +36,7 @@ export function ScheduledTaskModal({ defaultDate, onClose }: Props) {
 		Object.keys(CATEGORIES).forEach(addCategory);
 
 		return options;
-	}, [profile?.categories]);
+	}, [profile]);
 
 	const [category, setCategory] = useState<Category>(() => categoryOptions[0] ?? "routines");
 

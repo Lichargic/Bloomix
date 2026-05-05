@@ -6,7 +6,7 @@ export function useSignOut() {
   const navigate = useNavigate()
 
   return useCallback(async () => {
+    navigate('/', { replace: true })
     await supabase.auth.signOut()
-    navigate('/auth', { replace: true })
   }, [navigate])
 }

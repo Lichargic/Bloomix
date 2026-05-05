@@ -3,6 +3,18 @@ import { Topbar } from '../components/Topbar'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { BAG_EMPTY_STATE, getEmptyBagInventory } from '../lib/pageModels/bagModel'
 
+const TEASER_BOOSTS = [
+  { icon: '⚡', name: 'Focus Surge', desc: 'Sharpen concentration for a task block.' },
+  { icon: '🌿', name: 'Rest Restore', desc: 'Recover energy between sessions.' },
+  { icon: '🔥', name: 'Streak Shield', desc: 'Protect a streak from a missed day.' },
+] as const
+
+const TEASER_SEEDS = [
+  { icon: '🌱', name: 'Calm Seed', desc: 'Grow a tree rooted in stillness.' },
+  { icon: '🌸', name: 'Joy Seed', desc: 'Bloom when happiness compounds.' },
+  { icon: '🍂', name: 'Resilience Seed', desc: 'Thrives through consistent effort.' },
+] as const
+
 export function Bag() {
   useDocumentTitle('Bag')
   const inventory = getEmptyBagInventory()
@@ -14,7 +26,6 @@ export function Bag() {
         <section className="bag-hero" aria-labelledby="bag-title">
           <div>
             <h1 id="bag-title" className="section-title">BAG</h1>
-            <p className="section-sub">{BAG_EMPTY_STATE.body}</p>
           </div>
           <div className="petal-balance">
             <span className="petal-icon" aria-hidden="true">✿</span>
@@ -36,11 +47,27 @@ export function Bag() {
         <section className="bag-cols bag-empty-cols" aria-label="Bag sections">
           <div className="empty-panel">
             <h3 className="bag-section-h">BOOSTS</h3>
-            <p>{BAG_EMPTY_STATE.boostCopy}</p>
+            <div className="bag-grid">
+              {TEASER_BOOSTS.map(item => (
+                <div key={item.name} className="bag-cell locked" aria-hidden="true">
+                  <div className="icon">{item.icon}</div>
+                  <h3>{item.name}</h3>
+                  <p>{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="empty-panel">
             <h3 className="bag-section-h">SEEDS</h3>
-            <p>{BAG_EMPTY_STATE.seedCopy}</p>
+            <div className="bag-grid">
+              {TEASER_SEEDS.map(item => (
+                <div key={item.name} className="bag-cell locked" aria-hidden="true">
+                  <div className="icon">{item.icon}</div>
+                  <h3>{item.name}</h3>
+                  <p>{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </main>

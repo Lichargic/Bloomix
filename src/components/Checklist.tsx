@@ -351,14 +351,16 @@ export function Checklist({ showCategories, date }: ChecklistProps) {
 				<div className={`checklist-scroll-regions ${events.length > 0 ? "has-events" : ""}`}>
 					<div className="scroll-fade-v task-list-fade">
 						<ul className="task-list" ref={taskListRef} role="list">
-							{visible.length === 0 && addPhase !== "habit" && (
+							{visible.length === 0 && addPhase !== "habit" && effectiveFilter !== "all" && (
 								<li className="empty">
-									<p>
-										{effectiveFilter === "all" ?
-											"No habits yet."
-										:	`No ${getCategoryConfig(effectiveFilter as Category).label.toLowerCase()} today.`
-										}
-									</p>
+									<p>{`No ${getCategoryConfig(effectiveFilter as Category).label.toLowerCase()} today.`}</p>
+								</li>
+							)}
+							{visible.length === 0 && addPhase !== "habit" && effectiveFilter === "all" && (
+								<li className="empty-first-run">
+									<span className="empty-first-run-icon" aria-hidden="true">🌱</span>
+									<p className="empty-first-run-heading">Plant your first habit</p>
+									<p className="empty-first-run-body">Add something small. Checking it off is what feeds the tree.</p>
 								</li>
 							)}
 							{visible.map((t) => {

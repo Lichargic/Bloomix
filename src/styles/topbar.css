@@ -104,6 +104,8 @@
 }
 .topbar .music-btn:hover { opacity: 1; background: rgba(255,255,255,.12); }
 .topbar .music-btn:active { transform: scale(0.9); }
+.topbar .music-btn.is-playing { opacity: 1; background: rgba(255,255,255,.18); }
+.topbar .music-btn.is-playing:hover { background: rgba(255,255,255,.26); }
 .topbar .music-btn svg { width: 18px; height: 18px; }
 
 /* ── User dropdown menu ── */

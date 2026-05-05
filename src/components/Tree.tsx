@@ -7,15 +7,18 @@ import type { Season } from "../lib/theme";
 
 // ─── Animated canvas tree (wind-sway shader) ─────────────────────────────────
 
-interface AnimatedTreeProps {
+export interface AnimatedTreeProps {
 	src: string;
 	className?: string;
 	mobile?: boolean;
 }
 
-function AnimatedTree({ src, className = "tree-canvas", mobile = false }: AnimatedTreeProps) {
+export function AnimatedTree({ src, className = "tree-canvas", mobile = false }: AnimatedTreeProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const imgRef   = useRef<HTMLImageElement | null>(null);
 
+	// Animation loop — runs once per mount, reads imgRef each frame so src
+	// swaps are seamless with no loop restart or canvas clear.
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const ctx = canvas?.getContext("2d");
@@ -23,10 +26,8 @@ function AnimatedTree({ src, className = "tree-canvas", mobile = false }: Animat
 
 		let frame = 0;
 		let active = true;
-		let imageReady = false;
-		const img = new Image();
 
-		function fitRect(width: number, height: number) {
+		function fitRect(img: HTMLImageElement, width: number, height: number) {
 			const iw = img.naturalWidth || img.width;
 			const ih = img.naturalHeight || img.height;
 			const scale = Math.min(width / iw, height / ih);
@@ -38,39 +39,37 @@ function AnimatedTree({ src, className = "tree-canvas", mobile = false }: Animat
 		function resize() {
 			const box = canvas!.getBoundingClientRect();
 			const dpr = Math.min(window.devicePixelRatio || 1, 2);
-			const width = Math.max(1, Math.round(box.width));
+			const width  = Math.max(1, Math.round(box.width));
 			const height = Math.max(1, Math.round(box.height));
-			canvas!.width = Math.round(width * dpr);
+			canvas!.width  = Math.round(width  * dpr);
 			canvas!.height = Math.round(height * dpr);
 			ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
 		}
 
 		function draw(now: number) {
 			if (!active) return;
-			const width = canvas!.clientWidth;
+			const img    = imgRef.current;
+			const width  = canvas!.clientWidth;
 			const height = canvas!.clientHeight;
 			ctx!.clearRect(0, 0, width, height);
 
-			if (imageReady) {
-				const rect = fitRect(width, height);
-				const slice = mobile ? 5 : 6;
+			if (img) {
+				const rect   = fitRect(img, width, height);
+				const slice  = mobile ? 5 : 6;
 				const maxAmp = mobile ? 5 : 9;
-				const phase = now * 0.00042;
-				// Overlap each slice by a small amount to prevent subpixel gaps
-				// that appear as thin white horizontal lines across the tree
+				const phase  = now * 0.00042;
 				const overlap = 0.5;
 
 				for (let y = 0; y < rect.h; y += slice) {
-					const h = Math.min(slice, rect.h - y);
+					const h       = Math.min(slice, rect.h - y);
 					const fromTop = y / rect.h;
-					const bend = Math.pow(1 - fromTop, 1.75);
-					const offset =
+					const bend    = Math.pow(1 - fromTop, 1.75);
+					const offset  =
 						Math.sin(phase + fromTop * 1.9) * maxAmp * bend +
 						Math.sin(phase * 0.63 + fromTop * 3.1) * maxAmp * 0.22 * bend;
 
-					const srcY = (y / rect.h) * img.naturalHeight;
-					const srcH = (h / rect.h) * img.naturalHeight;
-					// Extend destination height by overlap to seal gaps between slices
+					const srcY  = (y / rect.h) * img.naturalHeight;
+					const srcH  = (h / rect.h) * img.naturalHeight;
 					const destH = h + (y + h < rect.h ? overlap : 0);
 
 					ctx!.drawImage(img, 0, srcY, img.naturalWidth, srcH, rect.x + offset, rect.y + y, rect.w, destH);
@@ -80,28 +79,29 @@ function AnimatedTree({ src, className = "tree-canvas", mobile = false }: Animat
 			frame = window.requestAnimationFrame(draw);
 		}
 
-		img.onload = () => {
-			imageReady = true;
-			resize();
-			frame = window.requestAnimationFrame(draw);
-		};
-
-		img.onerror = () => {
-			imageReady = false;
-		};
-
-		img.src = src;
+		resize();
+		frame = window.requestAnimationFrame(draw);
 
 		const ro = new ResizeObserver(resize);
 		ro.observe(canvas);
-		resize();
 
 		return () => {
 			active = false;
 			ro.disconnect();
 			window.cancelAnimationFrame(frame);
 		};
-	}, [src, mobile]);
+	}, [mobile]);
+
+	// Image loader — updates the ref so the running loop picks up the new
+	// image on the next frame without any gap or canvas clear.
+	useEffect(() => {
+		let cancelled = false;
+		const img = new Image();
+		img.onload  = () => { if (!cancelled) imgRef.current = img; };
+		img.onerror = () => { if (!cancelled) imgRef.current = null; };
+		img.src = src;
+		return () => { cancelled = true; };
+	}, [src]);
 
 	return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }

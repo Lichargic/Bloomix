@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Topbar } from "../components/Topbar";
 import { SEASONS, getTreeStages } from "../lib/theme";
@@ -10,6 +11,8 @@ import { getTreeCycleProgress } from "../lib/growth";
 export function Garden() {
 	useDocumentTitle("Garden");
 
+	const [selectedId, setSelectedId] = useState<string | null>(null);
+
 	const {
 		data: archives = [],
 		isLoading: isArchivesLoading,
@@ -17,10 +20,10 @@ export function Garden() {
 		error: archivesError,
 	} = useGardenArchive();
 
-	const featuredTree = archives[0] ?? null;
+	const featuredTree = (selectedId ? archives.find((a) => a.id === selectedId) : undefined) ?? archives[0] ?? null;
 	const featuredSeason = featuredTree ? SEASONS[featuredTree.season] : null;
 	const featuredTreeImg = featuredTree ? getTreeStages(featuredTree.season, featuredTree.tree_shape)[6] : null;
-	const latestArchiveEnd = featuredTree?.cycle_ended_on ?? null;
+	const latestArchiveEnd = archives[0]?.cycle_ended_on ?? null;
 
 	const {
 		data: activityStats = { days: 0, tasks: 0 },
@@ -112,6 +115,28 @@ export function Garden() {
 							</div>
 						}
 					</div>
+
+					{archives.length > 1 && (
+						<div className="garden-archive-thumbnail-strip" aria-label="Archived trees">
+							{archives.map((archive) => {
+								const thumbImg = getTreeStages(archive.season, archive.tree_shape)[6];
+								const season = SEASONS[archive.season];
+								const isActive = archive.id === (selectedId ?? archives[0]?.id);
+								return (
+									<button
+										key={archive.id}
+										aria-pressed={isActive}
+										aria-label={`${season.label} tree, archived ${new Date(archive.archived_at).toLocaleDateString()}`}
+										className={`garden-archive-thumbnail${isActive ? " garden-archive-thumbnail--active" : ""}`}
+										onClick={() => setSelectedId(archive.id)}
+									>
+										<img src={thumbImg} alt="" width={64} height={64} />
+										<span>{season.label}</span>
+									</button>
+								);
+							})}
+						</div>
+					)}
 
 					<aside className="garden-archive-stats" aria-label="Garden summary">
 						<div className="garden-archive-stat-card">

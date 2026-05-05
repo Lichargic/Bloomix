@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { Landing } from './pages/Landing'
+import { HomePage } from './pages/HomePage'
 import { Auth } from './pages/Auth'
 import { AuthCallback } from './pages/AuthCallback'
 import { AuthRoute } from './routes/AuthRoute'
@@ -29,7 +29,7 @@ export default function App() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <Routes>
         {/* Public */}
-        <Route index element={<Landing />} />
+        <Route index element={<HomePage />} />
         {/* auth/callback must be outside PublicOnly so it can process the token before redirecting */}
         <Route path="auth/callback" element={<AuthCallback />} />
 

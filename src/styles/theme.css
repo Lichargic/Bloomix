@@ -1,6 +1,13 @@
 /* ───────────────────────── Theme tokens ───────────────────────── */
+
+/* Register colour tokens so CSS can interpolate them between seasons */
+@property --sky-top  { syntax: '<color>'; inherits: true; initial-value: #ffd6e1; }
+@property --sky-bot  { syntax: '<color>'; inherits: true; initial-value: #f7f4d5; }
+@property --accent-2 { syntax: '<color>'; inherits: true; initial-value: #c9d39a; }
+@property --panel    { syntax: '<color>'; inherits: true; initial-value: #c5d3a4; }
+
 :root,
-body[data-season="spring"] {
+[data-season="spring"] {
   --bg: #f7f4d5;
   --ink: #1a3a2e;
   --ink-soft: #4a5e4a;
@@ -15,12 +22,14 @@ body[data-season="spring"] {
   --task-ink: #fefae1;
   --check-bg: #fefae1;
   --check-ink: #67a35a;
+  --sky-top: #ffd6e1;
+  --sky-bot: #f7f4d5;
   --weather: linear-gradient(180deg, #ffd6e1 0%, #f7f4d5 60%);
   --grow-bar: linear-gradient(90deg, #88a96f 0%, #c9d39a 100%);
   --tree-shadow-bottom: 11%;
 }
 
-body[data-season="summer"] {
+[data-season="summer"] {
   --bg: #fefae1;
   --ink: #2d3a1f;
   --ink-soft: #586e3e;
@@ -35,12 +44,14 @@ body[data-season="summer"] {
   --task-ink: #fefae1;
   --check-bg: #fefae1;
   --check-ink: #364025;
+  --sky-top: #ffe9a8;
+  --sky-bot: #fefae1;
   --weather: linear-gradient(180deg, #ffe9a8 0%, #fefae1 60%);
   --grow-bar: linear-gradient(90deg, #5a8a4a 0%, #c4d489 100%);
   --tree-shadow-bottom: 4%;
 }
 
-body[data-season="autumn"] {
+[data-season="autumn"] {
   --bg: #f5e9d0;
   --ink: #3a230f;
   --ink-soft: #6b4a30;
@@ -55,12 +66,14 @@ body[data-season="autumn"] {
   --task-ink: #fefae1;
   --check-bg: #fefae1;
   --check-ink: #4a2614;
+  --sky-top: #f5cfa0;
+  --sky-bot: #f5e9d0;
   --weather: linear-gradient(180deg, #f5cfa0 0%, #f5e9d0 60%);
   --grow-bar: linear-gradient(90deg, #bc6c25 0%, #f0c75e 100%);
   --tree-shadow-bottom: 0%;
 }
 
-body[data-season="winter"] {
+[data-season="winter"] {
   --bg: #e8eef2;
   --ink: #1d2b3a;
   --ink-soft: #4d5e74;
@@ -75,6 +88,8 @@ body[data-season="winter"] {
   --task-ink: #f4f7fa;
   --check-bg: #f4f7fa;
   --check-ink: #1d2b3a;
+  --sky-top: #d6e3ee;
+  --sky-bot: #e8eef2;
   --weather: linear-gradient(180deg, #d6e3ee 0%, #e8eef2 60%);
   --grow-bar: linear-gradient(90deg, #4068a8 0%, #bbd2f6 100%);
   --tree-shadow-bottom: 9%;

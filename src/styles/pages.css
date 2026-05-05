@@ -298,6 +298,61 @@
   box-shadow: 0 1px 0 rgba(0,0,0,.16);
 }
 
+.garden-archive-thumbnail-strip {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--panel-stroke) transparent;
+}
+
+.garden-archive-thumbnail {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid var(--panel-stroke);
+  background: var(--panel);
+  cursor: pointer;
+  transition: border-color .12s, background .12s, transform .12s;
+}
+
+.garden-archive-thumbnail img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--weather);
+}
+
+.garden-archive-thumbnail span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.garden-archive-thumbnail:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.garden-archive-thumbnail--active {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 12%, var(--panel));
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.garden-archive-thumbnail--active span {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 /* ─────────────────── Settings ─────────────────── */
 .settings-canvas {
   width: 100%;

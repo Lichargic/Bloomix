@@ -61,7 +61,7 @@
 @media (max-width: 1100px) {
   .today-grid { grid-template-columns: 1fr; }
   .today-grid .checklist { min-height: auto; }
-  .today-grid .tree-stage { min-height: 460px; }
+  .today-grid .tree-stage { height: clamp(220px, 38dvh, 380px); min-height: 0; }
 }
 
 @media (max-width: 720px) {

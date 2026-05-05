@@ -8,17 +8,13 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useTheme } from "../providers/ThemeProvider";
 import { OptimizedImage } from "../components/OptimizedImage";
 
-type SeedChoice = TreeShape | "shape-3";
-
 const SEED_OPTIONS: {
-	value: SeedChoice;
+	value: TreeShape;
 	label: string;
 	body: string;
-	available: boolean;
 }[] = [
-	{ value: "shape-1", label: "Oak", body: "Classic, full canopy.", available: true },
-	{ value: "shape-2", label: "Birch", body: "Tall and light.", available: true },
-	{ value: "shape-3", label: "Coming soon", body: "Still growing.", available: false },
+	{ value: "shape-1", label: "Oak", body: "Classic, full canopy." },
+	{ value: "shape-2", label: "Birch", body: "Tall and light." },
 ];
 
 export function Onboarding() {
@@ -76,11 +72,12 @@ export function Onboarding() {
 						<br />
 						Rewards effort, not perfection.
 					</p>
-					<div className="step-dots">
+					<div className="step-dots" role="group" aria-label="Step 1 of 3">
 						<span className="active" />
 						<span />
 						<span />
 					</div>
+					<p className="step-dots-label">1 of 3</p>
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
@@ -114,11 +111,12 @@ export function Onboarding() {
 						}}>
 						<h1 className="step-h step-h-large">Choose your seed</h1>
 						<p className="tagline">Pick your tree. Your first season is chosen for you.</p>
-						<div className="step-dots">
+						<div className="step-dots" role="group" aria-label="Step 2 of 3">
 							<span />
 							<span className="active" />
 							<span />
 						</div>
+						<p className="step-dots-label">2 of 3</p>
 						<div className="seed-stage">
 							<div className="seed-hero-preview">
 								<OptimizedImage
@@ -130,21 +128,32 @@ export function Onboarding() {
 								/>
 							</div>
 
-							<div className="seed-choice-list" role="radiogroup" aria-label="Seed shape">
+							<div className="seed-choice-col">
+								<div
+								className="seed-choice-list"
+								role="radiogroup"
+								aria-label="Seed shape"
+								onKeyDown={(e) => {
+									if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(e.key)) return;
+									e.preventDefault();
+									const currentIndex = SEED_OPTIONS.findIndex((o) => o.value === shape);
+									const delta = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1;
+									const nextIndex = (currentIndex + delta + SEED_OPTIONS.length) % SEED_OPTIONS.length;
+									const nextOption = SEED_OPTIONS[nextIndex];
+									setShape(nextOption.value);
+									(e.currentTarget.querySelectorAll<HTMLButtonElement>("[role='radio']")[nextIndex]).focus();
+								}}>
 								{SEED_OPTIONS.map((option) => {
-									const selected = option.available && shape === option.value;
+									const selected = shape === option.value;
 									return (
 										<button
 											type="button"
 											role="radio"
 											key={option.value}
 											aria-checked={selected}
-											aria-disabled={!option.available}
-											disabled={!option.available}
-											className={`seed-choice-row ${selected ? "selected" : ""} ${!option.available ? "locked" : ""}`}
-											onClick={() => {
-												if (option.available) setShape(option.value as TreeShape);
-											}}>
+											tabIndex={selected ? 0 : -1}
+											className={`seed-choice-row ${selected ? "selected" : ""}`}
+											onClick={() => setShape(option.value)}>
 											<span className="seed-choice-mark" aria-hidden="true">
 												{option.value.replace("shape-", "")}
 											</span>
@@ -155,6 +164,8 @@ export function Onboarding() {
 										</button>
 									);
 								})}
+							</div>
+								<p className="seed-coming-soon">More shapes coming soon ✦</p>
 							</div>
 						</div>
 						<div className="welcome-foot">
@@ -177,11 +188,12 @@ export function Onboarding() {
 				<form onSubmit={handleFinish}>
 					<h1 className="step-h step-h-compact">What matters?</h1>
 					<p className="tagline">Pick what you'd like to track. You can change these anytime.</p>
-					<div className="step-dots">
+					<div className="step-dots" role="group" aria-label="Step 3 of 3">
 						<span />
 						<span />
 						<span className="active" />
 					</div>
+					<p className="step-dots-label">3 of 3</p>
 					<div className="cat-pick-grid">
 						{(Object.entries(CATEGORIES) as [Category, (typeof CATEGORIES)[Category]][]).map(([k, v]) => (
 							<button

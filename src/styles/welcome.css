@@ -35,6 +35,13 @@
 	object-fit: contain;
 	filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.18));
 }
+.welcome-card a:has(.logo) {
+	display: contents;
+}
+.welcome-card a:has(.logo):focus-visible {
+	outline-offset: 6px;
+	border-radius: 140px;
+}
 .welcome-card h1.bloomix-mark {
 	font-family: "Pixelify Sans";
 	font-weight: 700;
@@ -108,8 +115,9 @@
 
 /* ── Auth ── */
 .auth-error {
-	color: #8f4d12;
-	background: rgba(143, 77, 18, 0.08);
+	color: #b91c1c;
+	background: rgba(185, 28, 28, 0.07);
+	border: 1px solid rgba(185, 28, 28, 0.3);
 	border-radius: 10px;
 	padding: 8px 12px;
 	font-size: 13px;
@@ -273,6 +281,11 @@
 	font-weight: 800;
 	line-height: 1;
 }
+.seed-choice-col {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
 .seed-choice-list {
 	display: grid;
 	gap: 8px;
@@ -333,6 +346,17 @@
 .seed-choice-grid {
 	align-items: stretch;
 }
+.seed-coming-soon {
+	display: inline-block;
+	margin: 10px 0 0;
+	padding: 4px 12px;
+	font-size: 11px;
+	color: var(--ink-soft);
+	border: 1.5px dashed color-mix(in srgb, var(--panel-stroke) 60%, transparent);
+	border-radius: 999px;
+	letter-spacing: 0.3px;
+	opacity: 0.75;
+}
 .seed-choice {
 	text-align: left;
 	min-height: 174px;
@@ -388,8 +412,15 @@
 	display: flex;
 	justify-content: center;
 	gap: 8px;
-	margin: 16px 0 24px;
+	margin: 16px 0 6px;
 	padding: 0;
+}
+.step-dots-label {
+	font-size: 11px;
+	color: var(--ink-soft);
+	opacity: 0.65;
+	margin: 0 0 18px;
+	letter-spacing: 0.4px;
 }
 .step-dots span {
 	display: block;
