@@ -407,7 +407,7 @@ export function Calendar() {
 																		style={
 																			{
 																				"--cat": cat.color,
-																			} as React.CSSProperties
+																			} as unknown as React.CSSProperties
 																		}>
 																		<span className="cat-dot" aria-hidden="true" />
 																		<span className="task-cat-label">

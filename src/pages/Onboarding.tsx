@@ -201,7 +201,7 @@ export function Onboarding() {
 								key={k}
 								className={`cat-pick ${cats.includes(k) ? "selected" : ""}`}
 								onClick={() => toggleCat(k)}
-								style={{ "--chip": v.color } as React.CSSProperties}>
+								style={{ "--chip": v.color } as unknown as React.CSSProperties}>
 								<span className="cat-pick-icon">{v.icon}</span>
 								<span className="cat-pick-label">{v.label}</span>
 								<span className="cat-pick-check">{cats.includes(k) ? "✓" : "+"}</span>

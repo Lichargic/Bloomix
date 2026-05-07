@@ -2,39 +2,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Season, Tone, TreeShape } from "../lib/theme";
 
-const SEASONS = new Set<Season>(["spring", "summer", "autumn", "winter"]);
-const TONES = new Set<Tone>(["soft", "whimsy", "matter"]);
-const TREESHAPES = new Set<TreeShape>(["shape-1", "shape-2"]);
-
-function readSeason(): Season {
+function readEnum<T extends string>(key: string, valid: Set<T>, fallback: T): T {
 	try {
-		const v = localStorage.getItem("theme:season");
-		if (v && SEASONS.has(v as Season)) return v as Season;
+		const v = localStorage.getItem(key);
+		if (v && valid.has(v as T)) return v as T;
 	} catch {
 		/* storage unavailable */
 	}
-	return "spring";
+	return fallback;
 }
 
-function readTone(): Tone {
-	try {
-		const v = localStorage.getItem("theme:tone");
-		if (v && TONES.has(v as Tone)) return v as Tone;
-	} catch {
-		/* storage unavailable */
-	}
-	return "soft";
-}
-
-function readTreeShape(): TreeShape {
-	try {
-		const v = localStorage.getItem("theme:treeShape");
-		if (v && TREESHAPES.has(v as TreeShape)) return v as TreeShape;
-	} catch {
-		/* storage unavailable */
-	}
-	return "shape-1";
-}
+const readSeason    = () => readEnum<Season>   ("theme:season",    new Set(["spring", "summer", "autumn", "winter"]), "spring")
+const readTone      = () => readEnum<Tone>     ("theme:tone",      new Set(["soft", "whimsy", "matter"]),            "soft")
+const readTreeShape = () => readEnum<TreeShape>("theme:treeShape", new Set(["shape-1", "shape-2"]),                  "shape-1")
 
 function readBool(key: string, fallback: boolean): boolean {
 	try {
@@ -81,6 +61,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		document.body.setAttribute("data-season", season);
+		const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+		if (link) {
+			link.href = `/assets/logos/${season}.png`;
+			link.type = "image/png";
+		}
 	}, [season]);
 
 	const setSeason = useCallback((s: Season) => {

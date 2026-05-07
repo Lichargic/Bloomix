@@ -2,104 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../providers/ThemeProvider'
 import { SEASONS, getTreeStages } from '../lib/theme'
-import type { Season } from '../lib/theme'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useScrollReveal } from '../hooks/useScrollReveal'
 import { Particles } from '../components/Particles'
 import { AnimatedTree } from '../components/Tree'
-
-// ── Data ────────────────────────────────────────────────────────────────────
-
-const SEASON_ORDER: Season[] = ['spring', 'summer', 'autumn', 'winter']
-
-
-const WHO_CARDS = [
-  {
-    title: 'Students',
-    body: 'Balancing coursework, deadlines, and mental health. Bloomix fits around your schedule, not the other way around.',
-  },
-  {
-    title: 'Deadline Havers',
-    body: 'Stressed and overwhelmed? Bloomix keeps you moving without piling on pressure during an already hard stretch.',
-  },
-  {
-    title: 'Burnout Recovery',
-    body: 'When doing one thing a day is a win, Bloomix celebrates that. No comparison, no leaderboards.',
-  },
-  {
-    title: 'Anxious Overthinkers',
-    body: 'The app never punishes you for being human. It just waits.',
-  },
-]
-
-const BEATS = [
-  {
-    stage: 0,
-    tag: 'Start',
-    headline: 'Plant your seed',
-    body: 'Your journey begins with one task. No lengthy setup, no onboarding wall. Just you and a tiny seed.',
-  },
-  {
-    stage: 1,
-    tag: 'What is Bloomix',
-    headline: "Productivity without the guilt",
-    body: 'Most apps reset your streak when you miss a day. Bloomix grows a pixel tree based on your total effort, not perfect attendance.',
-  },
-  {
-    stage: 2,
-    tag: 'Add your tasks',
-    headline: 'Set tasks that fit your life',
-    body: 'Studying, routines, self-care. No rigid templates. Tasks reset each day. You decide what progress looks like.',
-  },
-  {
-    stage: 3,
-    tag: 'Growth, not streaks',
-    headline: 'Every day you try counts',
-    body: 'Growth is based on total active days, not consecutive ones. One good day moves the tree. No streaks to break.',
-  },
-  {
-    stage: 4,
-    tag: 'Miss a day',
-    headline: 'Your tree goes quiet, never deleted',
-    body: 'Come back whenever. Complete one task and it blooms again. No lectures, no resets.',
-  },
-  {
-    stage: 5,
-    tag: 'Recovery',
-    headline: 'Built for self-compassion',
-    body: 'The app just waits for you. No comparison, no leaderboards. One thing done is worth celebrating.',
-  },
-  {
-    stage: 6,
-    tag: 'Your garden',
-    headline: 'Every completed tree lives on',
-    body: 'A gallery of your effort across seasons. Each one earned, none deleted.',
-  },
-]
-
-const TEAM_GROUPS = [
-  {
-    group: 'Core Direction',
-    members: [
-      { name: 'Muhammad Aman Ullah', role: 'Project Lead & Lead Full-Stack Developer', github: 'https://github.com/Lichargic',     src: '' },
-      { name: 'Sai Sharanya',        role: 'UI Designer & Team Coordinator',           github: 'https://github.com/sxsha777',      src: '' },
-    ],
-  },
-  {
-    group: 'Creative & Promotion',
-    members: [
-      { name: 'Rinoa Eamilao Cabais', role: 'Pixel Art Asset Designer',          github: '#',                                    src: '' },
-      { name: 'Vince Michael Dizon',  role: 'Music Composer & Audio Designer',   github: '#',                                    src: '' },
-      { name: 'Abrar Maawia',         role: 'Social Media & Marketing Designer', github: 'https://github.com/abrarmaawia33',     src: '' },
-    ],
-  },
-  {
-    group: 'Support & Testing',
-    members: [
-      { name: 'Aysa Akther Muskan', role: 'Documentation & Research Support', github: 'https://github.com/spid3rbyte',  src: '' },
-      { name: 'Vinz Patrick',       role: 'QA & User Feedback Tester',        github: 'https://github.com/vinzzzxy222', src: '' },
-    ],
-  },
-]
+import { SEASON_ORDER, SEASON_MARK, WHO_CARDS, BEATS, TEAM_GROUPS } from '../data/homeContent'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -107,38 +14,17 @@ function initials(name: string) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('')
 }
 
-/** Hash a name string to a deterministic CSS gradient in the earthy 70–180° hue range. */
+/** Hash a name to a deterministic earthy CSS gradient (hue range 70–180°). */
 function nameToGradient(name: string): string {
   let hash = 0
   for (let i = 0; i < name.length; i++) {
     hash = (hash * 31 + name.charCodeAt(i)) >>> 0
   }
-  // Map hash to hue range 70–180 (earthy greens, yellow-greens, teals)
-  const hue = 70 + (hash % 111)
+  const hue  = 70 + (hash % 111)
   const hue2 = 70 + ((hash * 2654435761 >>> 0) % 111)
-  const sat = 38 + (hash % 22)
-  const lgt = 44 + (hash % 16)
+  const sat  = 38 + (hash % 22)   // 38–59%
+  const lgt  = 44 + (hash % 16)   // 44–59%
   return `linear-gradient(135deg, hsl(${hue},${sat}%,${lgt}%) 0%, hsl(${hue2},${sat + 8}%,${lgt + 10}%) 100%)`
-}
-
-function useRevealRef<T extends Element>() {
-  const ref = useRef<T>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('is-visible')
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.08 },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-  return ref
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -146,15 +32,13 @@ function useRevealRef<T extends Element>() {
 export function HomePage() {
   useDocumentTitle()
   const navigate = useNavigate()
-  const { season: appSeason, treeShape } = useTheme()
-  const [previewSeason, setPreviewSeason] = useState<Season>(appSeason)
-  const s = SEASONS[previewSeason]
+  const { season: appSeason, setSeason, treeShape } = useTheme()
+  const s = SEASONS[appSeason]
 
-  const SEASON_MARK: Record<Season, string> = { spring: '✿', summer: '☀', autumn: '❦', winter: '❄' }
-  const seasonMark = SEASON_MARK[previewSeason]
-  const stages1 = getTreeStages(previewSeason, 'shape-1')
-  const stages2 = getTreeStages(previewSeason, 'shape-2')
-  const stages3 = getTreeStages(previewSeason, 'shape-3')
+  const seasonMark = SEASON_MARK[appSeason]
+  const stages1 = getTreeStages(appSeason, 'shape-1')
+  const stages2 = getTreeStages(appSeason, 'shape-2')
+  const stages3 = getTreeStages(appSeason, 'shape-3')
 
   // Hero garden: stage-6, all 3 shapes. First/last trees clip their respective edges
   // symmetrically; inner trees use evenly spaced left anchors.
@@ -166,6 +50,77 @@ export function HomePage() {
     { src: stages1[6], h: 300, pos: { left: '70%'  }, bottom: 0 },
     { src: stages2[6], h: 300, pos: { right: '-1%' }, bottom: 0 },
   ]
+
+  // Hero entrance — Web Animations API (WAAPI) runs on the compositor thread and
+  // bypasses Firefox's CSS animation throttler (bug #1383239) which freezes CSS
+  // animations whose `from` keyframe positions elements off-screen.
+  const heroRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const hero = heroRef.current
+    if (!hero) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const ease = 'cubic-bezier(0, 0.8, 0.3, 1)'
+    const fromBot: Keyframe[] = [
+      { transform: 'translateY(180px)', opacity: 0 },
+      { transform: 'translateY(0)',     opacity: 1 },
+    ]
+    const fromTop: Keyframe[] = [
+      { transform: 'translateY(-80px)', opacity: 0 },
+      { transform: 'translateY(0)',     opacity: 1 },
+    ]
+    const drop: Keyframe[] = [
+      { transform: 'translateY(-40px)', opacity: 0 },
+      { transform: 'translateY(0)',     opacity: 1 },
+    ]
+    const drift: Keyframe[] = [
+      { transform: 'translate3d(0, 0, 0)' },
+      { transform: 'translate3d(0, -2px, 0)' },
+      { transform: 'translate3d(0, 0, 0)' },
+    ]
+
+    const timers: ReturnType<typeof setTimeout>[] = []
+
+    const run = (el: Element | null, keyframes: Keyframe[], duration: number, delay = 0) => {
+      timers.push(setTimeout(() => {
+        el?.animate(keyframes, { duration, easing: ease, fill: 'forwards' })
+      }, delay))
+    }
+
+    // Nav is outside .hp-hero
+    timers.push(setTimeout(() => {
+      document.querySelector('.hp-nav')?.animate(fromTop, { duration: 800, easing: ease, fill: 'forwards' })
+    }, 100))
+
+    run(hero.querySelector('.hp-hero-clouds'), fromTop, 900, 210)
+    run(hero.querySelector('.hp-hero-ground'), fromBot, 1050, 150)
+    run(hero.querySelector('.hp-hero-hills'),  fromBot, 1050, 280)
+
+    // Sky mark: entrance then continuous drift
+    timers.push(setTimeout(() => {
+      const el = hero.querySelector('.hp-hero-sky-mark')
+      if (!el) return
+      const entrance = el.animate(fromTop, { duration: 750, easing: ease, fill: 'forwards' })
+      entrance.addEventListener('finish', () => {
+        try { (entrance as Animation & { commitStyles?: () => void }).commitStyles?.() } catch { /* */ }
+        entrance.cancel()
+        el.animate(drift, { duration: 9000, easing: 'ease-in-out', iterations: Infinity })
+      })
+    }, 650))
+
+    // Garden trees — stagger inward from center
+    const treeDelays = [790, 610, 440, 520, 700, 880]
+    hero.querySelectorAll('.hp-garden-tree').forEach((tree, i) =>
+      run(tree, fromBot, 1200, treeDelays[i])
+    )
+
+    run(hero.querySelector('.hp-hero-badge'),   drop, 650,  980)
+    run(hero.querySelector('.hp-hero-h1'),      drop, 650, 1100)
+    run(hero.querySelector('.hp-hero-sub'),     drop, 650, 1220)
+    run(hero.querySelector('.hp-hero-actions'), drop, 650, 1340)
+
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   // Hero scroll cue — appears after 1.8s, fades on scroll
   const [cueVisible, setCueVisible] = useState(false)
@@ -189,9 +144,14 @@ export function HomePage() {
   const particleCount  = Math.round(8 + (currentBeat.stage / 6) * 18)
 
   useEffect(() => {
-    // Preload stage-6 hero trees for all seasons so season picks are instant
-    (['shape-1', 'shape-2', 'shape-3'] as const).forEach(shape => {
-      SEASON_ORDER.forEach(s => {
+    SEASON_ORDER.forEach(s => {
+      // All journey stages for shape-1
+      for (let i = 0; i <= 6; i++) {
+        const img = new Image()
+        img.src = `/assets/trees/shape-1/${s}/stage-${i}.png`
+      }
+      // Stage-6 for hero garden (shape-2, shape-3)
+      ;(['shape-2', 'shape-3'] as const).forEach(shape => {
         const img = new Image()
         img.src = `/assets/trees/${shape}/${s}/stage-6.png`
       })
@@ -214,10 +174,10 @@ export function HomePage() {
     return () => window.removeEventListener('scroll', update)
   }, [])
 
-  const whoRef    = useRevealRef<HTMLElement>()
-  const gardenRef = useRevealRef<HTMLElement>()
-  const teamRef   = useRevealRef<HTMLElement>()
-  const ctaRef    = useRevealRef<HTMLElement>()
+  const whoRef    = useScrollReveal<HTMLElement>()
+  const gardenRef = useScrollReveal<HTMLElement>()
+  const teamRef   = useScrollReveal<HTMLElement>()
+  const ctaRef    = useScrollReveal<HTMLElement>()
 
   // Mobile hamburger menu
   const [menuOpen, setMenuOpen] = useState(false)
@@ -242,14 +202,19 @@ export function HomePage() {
   }, [menuOpen])
 
   return (
-    <div className="hp" data-season={previewSeason}>
+    <div className="hp" data-season={appSeason}>
 
       {/* ── Nav ── */}
       <nav className="hp-nav">
-        <div className="hp-nav-brand">
+        <button
+          className="hp-nav-brand"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Scroll to top"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+        >
           <img src={s.logo} alt="" className="hp-nav-logo-img" />
           <span className="brand-word hp-nav-logo">Bloomix</span>
-        </div>
+        </button>
         <div className="hp-nav-links">
           <a href="#what">About</a>
           <a href="#who">Who it's for</a>
@@ -282,12 +247,13 @@ export function HomePage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="hp-hero">
-        <Particles season={previewSeason} count={16} />
+      <section className="hp-hero" ref={heroRef}>
+        <Particles season={appSeason} count={16} />
         <div className="hp-hero-clouds" aria-hidden="true">
           <div className="hp-cloud hp-cl1" />
           <div className="hp-cloud hp-cl2" />
           <div className="hp-cloud hp-cl3" />
+          <div className="hp-cloud hp-cl4 hp-cloud-haze" />
         </div>
         <div className="hp-hero-sky-mark" aria-hidden="true">{seasonMark}</div>
         <div className="hp-hero-hills" aria-hidden="true" />
@@ -303,7 +269,7 @@ export function HomePage() {
           ))}
         </div>
         <div className="hp-hero-ground" aria-hidden="true" />
-        <main id="main-content" className="hp-hero-content fade-in">
+        <main id="main-content" className="hp-hero-content">
           <div className="hp-hero-badge">Pixel Productivity App</div>
           <h1 className="hp-hero-h1">
             Grow at your<br /><em>own pace</em>
@@ -343,11 +309,11 @@ export function HomePage() {
           {/* Sticky tree column — desktop only */}
           <div className="hp-journey-tree-col">
             <div className="tree-stage hp-journey-scene" aria-hidden="true">
-              <Particles season={previewSeason} count={particleCount} />
+              <Particles season={appSeason} count={particleCount} />
               <div className="sky-mark">{seasonMark}</div>
               <div className="hills" />
               <div className="ground" />
-              <div key={journeyBeat} className="tree-wrap hp-journey-tree-blink">
+              <div className="tree-wrap">
                 <div className="tree-halo" />
                 <AnimatedTree src={journeyTreeSrc} className="tree-canvas" />
               </div>
@@ -426,35 +392,45 @@ export function HomePage() {
           <h2 className="hp-sh2">Meet the people<br />behind Bloomix</h2>
           <p className="hp-body" style={{ maxWidth: '460px' }}>A small group of students who built something we actually needed ourselves.</p>
           <div className="hp-team-groups">
-            {TEAM_GROUPS.map(group => (
-              <div key={group.group} className="hp-team-group">
-                <div className="hp-team-group-label">{group.group}</div>
-                <div className="hp-team-grid">
-                  {group.members.map(member => (
-                    <div key={member.name} className="hp-team-card">
-                      <div
-                        className="hp-team-avatar"
-                        style={member.src ? undefined : { background: nameToGradient(member.name) }}
-                      >
-                        {member.src
-                          ? <img src={member.src} alt={member.name} />
-                          : <span className="hp-team-initials">{initials(member.name)}</span>
-                        }
-                      </div>
-                      <div className="hp-team-info">
-                        <div className="hp-team-name">{member.name}</div>
-                        <div className="hp-team-role">{member.role}</div>
-                        {member.github !== '#' && (
-                          <a href={member.github} className="hp-team-gh" target="_blank" rel="noopener noreferrer" aria-label={`${member.name} on GitHub`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+            {(() => {
+              let cardIdx = 0
+              return TEAM_GROUPS.map(group => (
+                <div key={group.group} className="hp-team-group">
+                  <div className="hp-team-group-label">{group.group}</div>
+                  <div className="hp-team-grid">
+                    {group.members.map(member => {
+                      const delay = cardIdx++ * 60
+                      return (
+                        <div
+                          key={member.name}
+                          className="hp-team-card"
+                          style={{ transitionDelay: `${delay}ms` }}
+                        >
+                          <div
+                            className="hp-team-avatar"
+                            style={member.src ? undefined : { background: nameToGradient(member.name) }}
+                          >
+                            {member.src
+                              ? <img src={member.src} alt={member.name} />
+                              : <span className="hp-team-initials">{initials(member.name)}</span>
+                            }
+                          </div>
+                          <div className="hp-team-info">
+                            <div className="hp-team-name">{member.name}</div>
+                            <div className="hp-team-role">{member.role}</div>
+                            {member.github !== '#' && (
+                              <a href={member.github} className="hp-team-gh" target="_blank" rel="noopener noreferrer" aria-label={`${member.name} on GitHub`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            })()}
           </div>
         </div>
       </section>
@@ -498,10 +474,10 @@ export function HomePage() {
         {SEASON_ORDER.map(seasonKey => (
           <button
             key={seasonKey}
-            className={`hp-season-btn${seasonKey === previewSeason ? ' hp-season-active' : ''}`}
-            onClick={() => setPreviewSeason(seasonKey)}
+            className={`hp-season-btn${seasonKey === appSeason ? ' hp-season-active' : ''}`}
+            onClick={() => setSeason(seasonKey)}
             aria-label={seasonKey}
-            aria-pressed={seasonKey === previewSeason}
+            aria-pressed={seasonKey === appSeason}
           >
             {SEASON_MARK[seasonKey]}
           </button>

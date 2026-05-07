@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { SEASONS } from "../lib/theme";
 import { getOptimizedImageUrl } from "../lib/imageSources";
 import { useAuth } from "../providers/AuthProvider";
@@ -12,6 +12,7 @@ import { startMusicOnInteraction } from "../lib/audio";
 const NAV_ITEMS = [
 	{ to: "/today", label: "Today" },
 	{ to: "/calendar", label: "Calendar" },
+	{ to: "/store", label: "Store" },
 	{ to: "/bag", label: "Bag" },
 	{ to: "/garden", label: "Garden" },
 ];
@@ -100,7 +101,7 @@ export function Topbar() {
 	return (
 		<>
 			<header className="topbar" data-screen-label="Topbar">
-				<div className="brand" aria-label="Bloomix">
+				<Link to="/" className="brand" aria-label="Bloomix — go to homepage">
 					<img
 						src={getOptimizedImageUrl(s.logo)}
 						alt=""
@@ -109,7 +110,7 @@ export function Topbar() {
 						height={64}
 					/>
 					<span className="brand-word">Bloomix</span>
-				</div>
+				</Link>
 
 				<nav className="nav" aria-label="Primary">
 					{NAV_ITEMS.map((item) => (

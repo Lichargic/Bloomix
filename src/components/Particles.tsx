@@ -11,11 +11,16 @@ const SEASON_GLYPHS: Record<Season, string[]> = {
 interface ParticlesProps {
   season: Season
   count?: number
+  glyphs?: string[]
+  color1?: string
+  color2?: string
 }
 
-export function Particles({ season, count = 14 }: ParticlesProps) {
+export function Particles({ season, count = 14, glyphs, color1, color2 }: ParticlesProps) {
   const s = SEASONS[season]
-  const glyphs = SEASON_GLYPHS[season]
+  const activeGlyphs = glyphs ?? SEASON_GLYPHS[season]
+  const activeColor1 = color1 ?? s.petal
+  const activeColor2 = color2 ?? s.petal2
 
   const particles = Array.from({ length: count }).map((_, i) => {
     const left  = (i * 11 + (i % 4) * 17) % 100
@@ -24,8 +29,8 @@ export function Particles({ season, count = 14 }: ParticlesProps) {
     const dx    = ((i % 7) - 3) * 18
     const sway  = 10 + (i % 4) * 9
     const size  = 9 + (i % 4) * 4
-    const color = i % 2 ? s.petal : s.petal2
-    const glyph = glyphs[i % glyphs.length]
+    const color = i % 2 ? activeColor1 : activeColor2
+    const glyph = activeGlyphs[i % activeGlyphs.length]
 
     return (
       <span
@@ -41,7 +46,7 @@ export function Particles({ season, count = 14 }: ParticlesProps) {
           '--dx':   `${dx}px`,
           '--sway': `${sway}px`,
           '--spin': `${i % 2 ? 1 : -1}`,
-        } as React.CSSProperties}
+        } as unknown as React.CSSProperties}
       >{glyph}</span>
     )
   })

@@ -23,6 +23,26 @@
 	.hp-reveal { opacity: 1; transition: none; }
 }
 
+/* Card stagger — cards fade in one by one; delay set inline per card.
+   Uses opacity only (not transform) to avoid conflicting with the
+   existing .hp-team-card:hover translateY(-2px) lift effect.
+   Must re-declare transform + box-shadow transitions so the more-specific
+   selector doesn't strip them from the computed style. */
+.hp-reveal .hp-team-card {
+	opacity: 0;
+	transition: opacity 0.4s ease, transform 0.12s, box-shadow 0.12s;
+}
+.hp-reveal.is-visible .hp-team-card {
+	opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+	.hp-reveal .hp-team-card {
+		opacity: 1;
+		transition: none;
+		transition-delay: 0ms;
+	}
+}
+
 /* ── Page wrapper ── */
 .hp {
 	min-height: 100dvh;
@@ -66,6 +86,7 @@
 	color: var(--nav-ink);
 	border-radius: 49px;
 	box-shadow: 0 6px 0 rgba(0,0,0,.18);
+	opacity: 0;
 }
 
 .hp-nav-brand {
@@ -138,7 +159,7 @@
 		--accent-2 10s ease-in-out,
 		--panel    10s ease-in-out;
 	position: relative;
-	overflow: clip; /* clip (not hidden) — hidden creates a scroll container in Firefox, silently killing child transform animations (Mozilla bug #1431893) */
+	overflow: clip;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -159,60 +180,123 @@
 	z-index: 6;
 	font-size: 32px;
 	filter: drop-shadow(0 3px 0 rgba(0,0,0,.12));
-	animation: season-drift 9s ease-in-out infinite;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 
-/* Soft rounded clouds — less blocky than pixel rects */
+/* Atmospheric clouds — soft, layered, and calm */
 .hp-hero-clouds {
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
 	z-index: 2;
+	overflow: clip;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 .hp-cloud {
 	position: absolute;
-	background: color-mix(in oklab, var(--paper) 82%, transparent);
 	border-radius: 999px;
-	animation: hp-drift linear infinite;
+	background:
+		radial-gradient(112% 118% at 30% 28%,
+			rgba(255,255,255,.96) 0%,
+			rgba(255,255,255,.88) 34%,
+			color-mix(in oklab, white 76%, var(--paper) 24%) 62%,
+			rgba(255,255,255,0) 84%),
+		radial-gradient(112% 120% at 52% 92%,
+			color-mix(in oklab, var(--sky-bot) 28%, white 72%) 0%,
+			rgba(255,255,255,0) 72%);
+	box-shadow:
+		0 18px 28px rgba(118, 160, 194, .14),
+		inset 0 -12px 18px rgba(171, 205, 233, .18);
+	filter: blur(.4px);
+	opacity: .92;
+	animation: hp-cloud-sway ease-in-out infinite;
+	will-change: transform, opacity;
 }
 .hp-cloud::before,
 .hp-cloud::after {
 	content: '';
 	position: absolute;
-	background: inherit;
 	border-radius: 999px;
+	background: inherit;
 }
-/* cloud 1 */
-.hp-cl1 {
-	width: 88px; height: 28px;
-	top: 112px; left: -130px;
-	animation-duration: 36s;
-	opacity: .8;
-}
-.hp-cl1::before { width: 50px; height: 38px; top: -22px; left: 14px; }
-.hp-cl1::after  { width: 32px; height: 28px; top: -14px; left: 46px; }
-/* cloud 2 */
-.hp-cl2 {
-	width: 116px; height: 26px;
-	top: 160px; left: -230px;
-	animation-duration: 58s;
-	animation-delay: -18s;
-	opacity: .55;
-}
-.hp-cl2::before { width: 62px; height: 36px; top: -20px; left: 20px; }
-.hp-cl2::after  { width: 40px; height: 26px; top: -12px; left: 58px; }
-/* cloud 3 */
-.hp-cl3 {
-	width: 68px; height: 20px;
-	top: 136px; left: -100px;
-	animation-duration: 80s;
-	animation-delay: -42s;
-	opacity: .38;
-}
-.hp-cl3::before { width: 38px; height: 28px; top: -16px; left: 10px; }
-.hp-cl3::after  { content: none; }
 
-@keyframes hp-drift { from { transform: translateX(0); } to { transform: translateX(110vw); } }
+.hp-cl1 {
+	width: 220px;
+	height: 74px;
+	top: 108px;
+	left: 8%;
+	animation-duration: 22s;
+	animation-delay: -4s;
+	opacity: .96;
+	filter: blur(.2px);
+}
+.hp-cl1::before { width: 118px; height: 88px; top: -36px; left: 18px; }
+.hp-cl1::after  { width: 94px; height: 66px; top: -18px; right: 22px; }
+
+.hp-cl2 {
+	width: 300px;
+	height: 82px;
+	top: 156px;
+	left: 34%;
+	animation-duration: 28s;
+	animation-delay: -10s;
+	opacity: .74;
+	filter: blur(1.2px);
+}
+.hp-cl2::before { width: 142px; height: 92px; top: -34px; left: 34px; }
+.hp-cl2::after  { width: 112px; height: 72px; top: -12px; right: 42px; }
+
+.hp-cl3 {
+	width: 160px;
+	height: 54px;
+	top: 96px;
+	left: 72%;
+	animation-duration: 36s;
+	animation-delay: -15s;
+	opacity: .58;
+	filter: blur(2.2px);
+}
+.hp-cl3::before { width: 86px; height: 60px; top: -26px; left: 16px; }
+.hp-cl3::after  { width: 68px; height: 44px; top: -10px; right: 18px; }
+
+.hp-cloud-haze {
+	inset: 6% 0 0 0;
+	height: 220px;
+	width: auto;
+	background:
+		radial-gradient(42% 74% at 16% 28%,
+			rgba(255,255,255,.30) 0%,
+			rgba(255,255,255,0) 72%),
+		radial-gradient(46% 78% at 78% 22%,
+			color-mix(in oklab, white 34%, var(--sky-top) 66%) 0%,
+			rgba(255,255,255,0) 70%),
+		linear-gradient(180deg,
+			rgba(255,255,255,.12) 0%,
+			transparent 100%);
+	filter: blur(28px);
+	opacity: .54;
+	animation: hp-cloud-haze-shift 26s ease-in-out infinite;
+}
+.hp-cloud-haze::before,
+.hp-cloud-haze::after {
+	content: none;
+}
+
+@keyframes hp-cloud-sway {
+	0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+	25% { transform: translate3d(16px, -6px, 0) scale(1.01); }
+	50% { transform: translate3d(10px, -4px, 0) scale(1.015); }
+	75% { transform: translate3d(-12px, 4px, 0) scale(.995); }
+}
+
+@keyframes hp-cloud-haze-shift {
+	0%, 100% { transform: translate3d(0, 0, 0); opacity: .46; }
+	25% { transform: translate3d(6px, -3px, 0); opacity: .52; }
+	50% { transform: translate3d(4px, 1px, 0); opacity: .58; }
+	75% { transform: translate3d(-5px, 3px, 0); opacity: .5; }
+}
 
 /* CSS terrain */
 .hp-hero-hills {
@@ -231,7 +315,8 @@
 			transparent 70%);
 	pointer-events: none;
 	z-index: 3;
-	opacity: .9;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 
 .hp-hero-ground {
@@ -246,6 +331,8 @@
 			color-mix(in oklab, var(--accent-2) 42%, var(--panel)) 46%,
 			color-mix(in oklab, var(--accent-2) 54%, var(--panel)) 100%);
 	filter: saturate(.98);
+	will-change: transform, opacity;
+	opacity: 0;
 }
 .hp-hero-ground::before {
 	content: "";
@@ -293,6 +380,8 @@
 .hp-garden-tree {
 	position: absolute;
 	bottom: 0;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 .hp-garden-canvas {
 	width: 100%;
@@ -325,7 +414,8 @@
 	padding: 5px 14px;
 	border-radius: 999px;
 	background: color-mix(in oklab, var(--paper) 60%, transparent);
-	animation: hp-fu 0.5s ease 0.05s both;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 
 .hp-hero-h1 {
@@ -336,7 +426,8 @@
 	line-height: 1.2;
 	letter-spacing: -1px;
 	text-shadow: 3px 3px 0 color-mix(in oklab, var(--paper) 60%, transparent);
-	animation: hp-fu 0.5s ease 0.12s both;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 .hp-hero-h1 em {
 	color: var(--panel-stroke);
@@ -349,7 +440,8 @@
 	color: var(--ink);
 	max-width: 420px;
 	line-height: 1.85;
-	animation: hp-fu 0.5s ease 0.2s both;
+	will-change: transform, opacity;
+	opacity: 0;
 }
 .hp-hero-sub strong { color: var(--panel-stroke); font-weight: 600; }
 
@@ -358,12 +450,8 @@
 	gap: 12px;
 	flex-wrap: wrap;
 	justify-content: center;
-	animation: hp-fu 0.5s ease 0.28s both;
-}
-
-@keyframes hp-fu {
-	from { opacity: 0; transform: translateY(14px); }
-	to   { opacity: 1; transform: translateY(0); }
+	will-change: transform, opacity;
+	opacity: 0;
 }
 
 /* ── Scroll cue — centered, raised above the fixed season picker ── */
@@ -413,18 +501,33 @@
 	50%       { transform: translateY(11px); }
 }
 
-/* Journey tree blink — triggered by key remount on beat change */
-@keyframes hp-tree-blink {
-	0%   { opacity: 0; }
-	100% { opacity: 1; }
+/* ── Hero entrance keyframes ── */
+@keyframes hero-from-top {
+	from { transform: translateY(-80px); opacity: 0; }
+	to   { transform: translateY(0);     opacity: 1; }
 }
-.hp-journey-tree-blink { animation: hp-tree-blink 80ms ease; }
+@keyframes hero-from-bot {
+	from { transform: translateY(180px); opacity: 0; }
+	to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes hero-drop {
+	from { transform: translateY(-40px); opacity: 0; }
+	to   { transform: translateY(0);     opacity: 1; }
+}
 
 @media (prefers-reduced-motion: reduce) {
+	.hp-nav,
+	.hp-hero-clouds,
+	.hp-hero-ground,
+	.hp-hero-hills,
+	.hp-hero-sky-mark,
+	.hp-garden-tree,
+	.hp-hero-badge,
+	.hp-hero-h1,
+	.hp-hero-sub,
+	.hp-hero-actions         { animation: none !important; opacity: 1 !important; }
 	.hp-scroll-bounce        { animation: none; }
-	.hp-hero-sky-mark        { animation: none; }
 	.hp-cloud                { animation: none; }
-	.hp-journey-tree-blink   { animation: none; }
 }
 
 /* ── Buttons — rounded to match in-app style ── */
@@ -711,6 +814,14 @@
 	grid-template-columns: repeat(3, 1fr);
 	margin-top: 0;
 }
+
+/* 2-member groups: shrink to 2 columns at the same card width and center */
+.hp-team-group .hp-team-grid:has(> .hp-team-card:nth-child(2):last-child) {
+	grid-template-columns: repeat(2, 1fr);
+	max-width: calc(200% / 3 - 5px);
+	margin-inline: auto;
+}
+
 .hp-team-card {
 	background: var(--bg);
 	border: 2px solid var(--panel-stroke);
@@ -724,6 +835,7 @@
 	box-shadow: 0 6px 0 rgba(0,0,0,.12);
 }
 .hp-team-avatar {
+	position: relative;
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	background: var(--panel);
@@ -733,10 +845,23 @@
 	align-items: center;
 	justify-content: center;
 }
+.hp-team-avatar::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--panel-stroke);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+}
+.hp-team-card:hover .hp-team-avatar::after {
+	opacity: 0.12;
+}
 .hp-team-avatar img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	object-position: center 15%;
 	display: block;
 	pointer-events: none;
 }

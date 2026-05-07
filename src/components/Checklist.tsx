@@ -418,7 +418,7 @@ export function Checklist({ showCategories, date }: ChecklistProps) {
 												<span className="task-meta-row">
 													<span
 														className="task-cat"
-														style={{ "--cat": cat.color } as React.CSSProperties}>
+														style={{ "--cat": cat.color } as unknown as React.CSSProperties}>
 														<span className="cat-dot" aria-hidden="true" />
 														<span className="task-cat-label">{cat.label}</span>
 													</span>
@@ -500,7 +500,7 @@ export function Checklist({ showCategories, date }: ChecklistProps) {
 														{showCategories && (
 															<span
 																className="task-cat"
-																style={{ "--cat": cat.color } as React.CSSProperties}>
+																style={{ "--cat": cat.color } as unknown as React.CSSProperties}>
 																<span className="cat-dot" aria-hidden="true" />
 																<span className="task-cat-label">{cat.label}</span>
 															</span>
@@ -612,7 +612,7 @@ export function Checklist({ showCategories, date }: ChecklistProps) {
 														onClick={() => selectDraftCategory(category)}>
 														<span
 															className="composer-category-icon"
-															style={{ "--cat": cat.color } as React.CSSProperties}
+															style={{ "--cat": cat.color } as unknown as React.CSSProperties}
 															aria-hidden="true">
 															{cat.icon}
 														</span>

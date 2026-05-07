@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Topbar } from '../components/Topbar'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useProfile, useUpdateProfile } from '../hooks/useProfile'
@@ -17,6 +18,7 @@ const TONE_OPTIONS: { value: Tone; label: string }[] = [
 
 export function Settings() {
   useDocumentTitle('Settings')
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { data: profile } = useProfile()
   const updateProfile = useUpdateProfile()
@@ -66,6 +68,10 @@ export function Settings() {
       <Topbar />
       <main id="main-content" className="canvas settings-canvas fade-in" data-screen-label="Settings">
         <h1 className="sr-only">Settings</h1>
+
+        <button className="settings-back" onClick={() => navigate(-1)} aria-label="Go back">
+          ← Back
+        </button>
 
         <div className="settings-board">
           <section className="settings-sheet" aria-label="Main settings">

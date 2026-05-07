@@ -4,6 +4,8 @@ import { getOptimizedImageUrl } from "../lib/imageSources";
 import { Particles } from "./Particles";
 import { useTheme } from "../providers/ThemeProvider";
 import type { Season } from "../lib/theme";
+import { getSkinById } from "../lib/store";
+import type { SkinId } from "../lib/store";
 
 // ─── Animated canvas tree (wind-sway shader) ─────────────────────────────────
 
@@ -118,6 +120,7 @@ interface TreeStageProps {
 	weather?: string;
 	day?: number;
 	mobile?: boolean;
+	skinId?: SkinId | null;
 }
 
 export function TreeStage({
@@ -130,16 +133,26 @@ export function TreeStage({
 	weather = "default",
 	day = 1,
 	mobile = false,
+	skinId,
 }: TreeStageProps) {
 	const { treeShape } = useTheme();
 	const s = SEASONS[season];
-	const stages = getTreeStages(season, treeShape);
+	const skin = getSkinById(skinId);
+	const imageSeason = skin ? skin.placeholderSeason : season;
+	const stages = getTreeStages(imageSeason, treeShape);
 	const safeStage = Math.max(0, Math.min(stages.length - 1, treeStage));
 	const treeImg = getOptimizedImageUrl(stages[safeStage]);
 	const vit = Math.max(0, Math.min(1, growth / 100));
 	const halo = 0.15 + vit * 0.55;
 	const tint = 0.5 + vit * 0.5;
 	const particleCount = Math.round(8 + vit * 18);
+
+	const skinVars = skin ? {
+		'--weather': `linear-gradient(180deg, ${skin.treeTheme.skyTop} 0%, ${skin.treeTheme.skyBot} 60%)`,
+		'--accent-2': skin.treeTheme.accent2,
+		'--panel': skin.treeTheme.panel,
+		'--accent': skin.treeTheme.haloColor,
+	} : {};
 
 	const blooms = [
 		{ left: "32%", top: "22%", at: 20 },
@@ -163,10 +176,25 @@ export function TreeStage({
 					"--tree-img": `url(${treeImg})`,
 					"--tree-tint": tint,
 					"--halo": halo,
-				} as React.CSSProperties
+					...skinVars,
+				} as unknown as React.CSSProperties
 			}
 			data-screen-label="Tree stage">
-			{weather !== "none" && <Particles season={season} count={particleCount} />}
+			{weather !== "none" && (
+				<Particles
+					season={season}
+					count={particleCount}
+					glyphs={skin?.treeTheme.particleGlyphs}
+					color1={skin?.treeTheme.particleColor1}
+					color2={skin?.treeTheme.particleColor2}
+				/>
+			)}
+
+			<div className="tree-clouds" aria-hidden="true">
+				<div className="tree-cloud tree-cloud-main" />
+				<div className="tree-cloud tree-cloud-secondary" />
+				<div className="tree-cloud tree-cloud-haze" />
+			</div>
 
 			<div className="sky-mark" aria-hidden="true">
 				{season === "winter" ?
@@ -203,7 +231,7 @@ export function TreeStage({
 							opacity: growth >= b.at ? 1 : 0,
 							transform: growth >= b.at ? "scale(1)" : "scale(0.4)",
 							transitionDelay: `${i * 70}ms`,
-							color: s.petal,
+							color: skin ? skin.treeTheme.particleColor1 : s.petal,
 						}}>
 						{bloomGlyph}
 					</span>

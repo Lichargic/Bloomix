@@ -35,6 +35,7 @@ function useToday() {
 		},
 		enabled: !!user,
 		staleTime: 60_000,
+		refetchOnWindowFocus: true,
 	});
 
 	return verifiedToday.data ?? fallbackToday;
@@ -170,6 +171,9 @@ function useInvalidateDailyTaskQueries() {
 		queryClient.invalidateQueries({ queryKey: COMPLETIONS_KEY(user.id) });
 		queryClient.invalidateQueries({ queryKey: TENDED_DAYS_KEY(user.id) });
 		queryClient.invalidateQueries({ queryKey: GARDEN_ACTIVITY_BASE_KEY(user.id) });
+		// Petal balance + history update after complete_daily_task awards petals
+		queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+		queryClient.invalidateQueries({ queryKey: ["petal_transactions", user.id] });
 	};
 }
 
@@ -260,7 +264,7 @@ export function useDeleteDailyTask() {
 	return useMutation({
 		mutationFn: async (id: string) => {
 			if (!user) throw new Error("Not authenticated");
-			const { error } = await supabase.from("daily_tasks").delete().eq("id", id).eq("user_id", user.id);
+			const { error } = await supabase.rpc("delete_daily_task", { p_task_id: id });
 			if (error) throw error;
 		},
 		onMutate: async (id) => {

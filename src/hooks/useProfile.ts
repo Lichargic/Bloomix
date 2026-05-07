@@ -15,6 +15,8 @@ export interface Profile {
 	show_weather: boolean | null;
 	onboarded_at: string | null;
 	created_at: string;
+	petals: number;
+	active_skin_id: import('../lib/store').SkinId | null;
 }
 
 export interface CreateProfileInput {

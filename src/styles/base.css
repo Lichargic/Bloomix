@@ -16,7 +16,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   transition: background-color .6s ease;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip (not hidden) — hidden creates a scroll container in Firefox, killing child transform animations (Mozilla bug #1431893) */
 }
 
 /* Bloomix keeps scrollable panels clean; content remains scrollable by wheel, touch, and keyboard. */

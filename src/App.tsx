@@ -12,6 +12,7 @@ const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ def
 const Today = lazy(() => import('./pages/Today').then(module => ({ default: module.Today })))
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })))
 const Bag = lazy(() => import('./pages/Bag').then(module => ({ default: module.Bag })))
+const Store = lazy(() => import('./pages/Store').then(module => ({ default: module.Store })))
 const Garden = lazy(() => import('./pages/Garden').then(module => ({ default: module.Garden })))
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })))
 
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="calendar/:date" element={protectedRoute(<Calendar />)} />
             <Route path="garden/*" element={protectedRoute(<Garden />)} />
             <Route path="bag" element={protectedRoute(<Bag />)} />
+            <Route path="store" element={protectedRoute(<Store />)} />
             <Route path="settings" element={protectedRoute(<Settings />)} />
           </Route>
         </Route>

@@ -16,6 +16,7 @@
 .topbar .brand {
   display: flex; align-items: center; gap: 12px;
   color: var(--nav-ink);
+  text-decoration: none;
 }
 .topbar .brand .brand-mark {
   width: 64px; height: 64px;

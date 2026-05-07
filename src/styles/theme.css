@@ -6,6 +6,13 @@
 @property --accent-2 { syntax: '<color>'; inherits: true; initial-value: #c9d39a; }
 @property --panel    { syntax: '<color>'; inherits: true; initial-value: #c5d3a4; }
 
+:root {
+  /* Semantic status colours — season-independent */
+  --color-owned-bg:   #2d6a4f;
+  --color-owned-text: #d8f3dc;
+  --color-warn:       #b45309;
+}
+
 :root,
 [data-season="spring"] {
   --bg: #f7f4d5;
